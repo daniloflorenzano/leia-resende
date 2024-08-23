@@ -2,25 +2,19 @@ namespace Core.News;
 
 public sealed class ScrapNews : IObservable<News>
 {
-    private List<IObserver<News>> observers;
+    #region Singleton Pattern
+    private static ScrapNews? _instance;
+
+    public static ScrapNews GetInstance() => _instance ??= new ScrapNews();
 
     private ScrapNews()
     {
         observers = new List<IObserver<News>>();
     }
+    #endregion
 
-    private static ScrapNews? _instance;
-
-    public static ScrapNews GetInstance() => _instance ??= new ScrapNews();
-
-
-    public Task Handle()
-    {
-        // TODO: criar uma cadeia de scrapers para cada site de notícias
-        var dummyNews = new News();
-        Notify(dummyNews);
-        return Task.CompletedTask;
-    }
+    #region Observer Pattern
+    private List<IObserver<News>> observers;
 
     private void Notify(News news)
     {
@@ -54,6 +48,16 @@ public sealed class ScrapNews : IObservable<News>
                 _observers.Remove(_observer);
         }
     }
+    #endregion
+    
+
+    public Task Handle()
+    {
+        // TODO: criar uma cadeia de scrapers para cada site de notícias
+        var dummyNews = new News();
+        Notify(dummyNews);
+        return Task.CompletedTask;
+    }    
 }
 
 
