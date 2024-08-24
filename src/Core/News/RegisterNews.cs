@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Logging;
+
 namespace Core.News;
 
-public sealed class RegisterNews(INewsRepository newsRepository) : IObserver<News>
+public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository newsRepository) : IObserver<News>
 {
 
     public async Task Handle(News news){
+        logger.LogInformation("Registrando notícia: {0}", news.Title);
+
         ValidateNews(news);
         await newsRepository.Create(news);
     }

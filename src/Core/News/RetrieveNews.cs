@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Logging;
+
 namespace Core.News;
 
-public sealed class RetrieveNews(INewsRepository newsRepository)
+public sealed class RetrieveNews(ILogger<RetrieveNews> logger, INewsRepository newsRepository)
 {
     public async Task<IEnumerable<News>> Handle(SearchFilter? filter = null)
     {     
+        logger.LogInformation("Buscando notícias");
+
         if (filter?.Subjects is not null) {
 
             if (!string.IsNullOrEmpty(filter.NewsTitle)) {
