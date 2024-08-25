@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.News;
 
-public sealed class RetrieveNews(ILogger<RetrieveNews> logger, INewsRepository newsRepository)
+public sealed class GetNews(ILogger<GetNews> logger, INewsRepository newsRepository)
 {
     public async Task<IEnumerable<News>> Handle(SearchFilter? filter = null)
     {     

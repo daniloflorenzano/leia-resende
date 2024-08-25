@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace Core.News;
 
 public sealed class ScrapNews : IObservable<News>
@@ -7,12 +5,11 @@ public sealed class ScrapNews : IObservable<News>
     #region Singleton Pattern
     private static ScrapNews? _instance;
 
-    public static ScrapNews GetInstance(ILogger<ScrapNews> logger) => _instance ??= new ScrapNews(logger);
+    public static ScrapNews GetInstance() => _instance ??= new ScrapNews();
 
-    private ScrapNews(ILogger<ScrapNews> logger)
+    private ScrapNews()
     {
         observers = new List<IObserver<News>>();
-        this.logger = logger;
     }
     #endregion
 
@@ -52,13 +49,9 @@ public sealed class ScrapNews : IObservable<News>
         }
     }
     #endregion
-    
-    private readonly ILogger<ScrapNews> logger;
 
     public Task Handle()
     {
-        logger.LogInformation("Buscando notícias");
-
         // TODO: criar uma cadeia de scrapers para cada site de notícias
         var dummyNews = new News();
         NotifySubs(dummyNews);
