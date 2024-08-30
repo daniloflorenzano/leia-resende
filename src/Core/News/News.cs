@@ -1,3 +1,6 @@
+using System.Text.Encodings.Web;
+using System.Text.Json;
+
 namespace Core.News;
 
 public sealed class News
@@ -9,5 +12,13 @@ public sealed class News
     public SubjectEnum Subject { get; set; }
     public DateTime PublishedAt { get; set; }
     public Uri OriginalUrl { get; set; } = null!;
-    public Uri ImageUrl { get; set; } = null!;
+    public Uri? ImageUrl { get; set; } = null!;
+
+    public override string ToString()
+    {
+        var json = JsonSerializer.Serialize(this,
+            new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        
+        return json;
+    }
 }
