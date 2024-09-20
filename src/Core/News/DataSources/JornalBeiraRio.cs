@@ -22,7 +22,7 @@ public class JornalBeiraRio(HttpClient httpclient)
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollection = await CreateNewsObject(articles);
+        var newsCollection = await CreateNewsObject(articles,SubjectEnum.Politics);
 
         return newsCollection;
     }
@@ -36,13 +36,13 @@ public class JornalBeiraRio(HttpClient httpclient)
         htmlDoc.LoadHtml(html); 
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-        var newsCollection = await CreateNewsObject(articles);
+        var newsCollection = await CreateNewsObject(articles,SubjectEnum.Health);
 
         return newsCollection;
 
     }
 
-    private Task<News[]> CreateNewsObject(HtmlNodeCollection articles)
+    private Task<News[]> CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)
     {
         var newsCollection = new List<News>();
 
@@ -63,7 +63,7 @@ public class JornalBeiraRio(HttpClient httpclient)
                 Content = content,
                 ImageUrl = image is null ? null : new Uri(image),
                 Author = "Jornal Beira Rio",
-                Subject = SubjectEnum.Politics
+                Subject = subject
             };
 
             newsCollection.Add(news);
