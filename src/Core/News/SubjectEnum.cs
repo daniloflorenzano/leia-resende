@@ -2,6 +2,7 @@ namespace Core.News;
 
 public enum SubjectEnum
 {
-    General,
-    Politics = 1
+    Politics = 1,
+    Health = 2,
+    Sports = 3,
 }
