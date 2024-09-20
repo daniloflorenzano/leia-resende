@@ -11,7 +11,7 @@ public class JornalBeiraRioTests(ITestOutputHelper output)
     {   
         var httpClient = new HttpClient();
         var jornalBeiraRio = new JornalBeiraRio(httpClient);
-        var news = await jornalBeiraRio.GetPolitcsNews();
+        var news = await jornalBeiraRio.GetNews();
         Assert.True(news.Length > 0);
 
         foreach (var n in news)
