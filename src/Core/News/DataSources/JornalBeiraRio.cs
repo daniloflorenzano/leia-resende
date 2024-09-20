@@ -7,6 +7,7 @@ public class JornalBeiraRio(HttpClient httpclient)
     public async Task<News[]> GetNews(){
         var news = new List<News>();
         news.AddRange(await GetPolitcsNews());
+        news.AddRange(await GetPolitcsHealth());
     
         return news.ToArray();
     }
@@ -21,6 +22,28 @@ public class JornalBeiraRio(HttpClient httpclient)
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
+        var newsCollection = await CreateNewsObject(articles);
+
+        return newsCollection;
+    }
+    
+    private async Task<News[]> GetPolitcsHealth()
+    {
+        var response = await httpclient.GetAsync("https://jornalbeirario.com.br/portal/?cat=18");
+        var html = await response.Content.ReadAsStringAsync();
+        
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(html); 
+
+        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
+        var newsCollection = await CreateNewsObject(articles);
+
+        return newsCollection;
+
+    }
+
+    private Task<News[]> CreateNewsObject(HtmlNodeCollection articles)
+    {
         var newsCollection = new List<News>();
 
         foreach (var article in articles)
@@ -46,6 +69,6 @@ public class JornalBeiraRio(HttpClient httpclient)
             newsCollection.Add(news);
         }
 
-        return newsCollection.ToArray();
+        return Task.FromResult(newsCollection.ToArray());
     }
 }
