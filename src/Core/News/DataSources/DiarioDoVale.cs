@@ -9,7 +9,7 @@ public class DiarioDoVale(HttpClient httpclient)
     {
         var news = new List<News>();
         news.AddRange(await GetPoliticsNews());
-
+        news.AddRange(await GetSportsNews());
         return news.ToArray();
     }
 
@@ -24,6 +24,20 @@ public class DiarioDoVale(HttpClient httpclient)
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
         var newsCollections = await CreateNewsObject(articles, SubjectEnum.Politics);
+        return newsCollections;
+    }
+    
+    private async Task<News[]> GetSportsNews()
+    {
+        var response = await httpclient.GetAsync("https://diariodovale.com.br/editoria/esporte/");
+        var html = await response.Content.ReadAsStringAsync();
+        
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(html); 
+
+        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
+
+        var newsCollections = await CreateNewsObject(articles, SubjectEnum.Sports);
         return newsCollections;
     }
 
