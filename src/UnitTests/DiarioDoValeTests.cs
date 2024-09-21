@@ -1,17 +1,16 @@
-using Core.News.DataSources;
+﻿using Core.News.DataSources;
 using Xunit.Abstractions;
 
 namespace UnitTests;
 
-public class JornalBeiraRioTests(ITestOutputHelper output)
+public class DiarioDoValeTests(ITestOutputHelper output)
 {
-
     [Fact]
     public async Task GetNews()
     {   
         var httpClient = new HttpClient();
-        var jornalBeiraRio = new JornalBeiraRio(httpClient);
-        var news = await jornalBeiraRio.GetNews();
+        var diarioDoVale = new DiarioDoVale(httpClient);
+        var news = await diarioDoVale.GetNews();
         Assert.True(news.Length > 0);
 
         foreach (var n in news)
