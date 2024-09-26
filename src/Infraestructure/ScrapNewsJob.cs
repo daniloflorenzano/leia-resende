@@ -8,6 +8,7 @@ public sealed class ScrapNewsJob(ILogger<ScrapNewsJob> logger, RegisterNewsSearc
 {
     public async Task Execute(IJobExecutionContext context)
     {
+        logger.LogInformation("Iniciando pesquisa de notícias");
         var search = new NewsSearch();
         await search.StartSearch();
 

@@ -15,11 +15,18 @@ public sealed class NewsMemCache : INewsRepository
 
     public Task Create(News news)
     {
-        throw new NotImplementedException();
+        // TODO: Implementar cache
+        return Task.CompletedTask;
+    }
+
+    public Task CreateRange(News[] news)
+    {
+        return Task.CompletedTask;
     }
 
     public Task<IEnumerable<News>> Read(Expression<Func<News, bool>>? where = null)
     {
-        throw new NotImplementedException();
+        // TODO: Implementar cache
+        return Task.FromResult(Enumerable.Empty<News>());
     }
 }

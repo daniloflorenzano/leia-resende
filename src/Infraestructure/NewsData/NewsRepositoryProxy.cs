@@ -16,11 +16,17 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
         await WriteNewsToDb(news);
     }
 
+    public async Task CreateRange(News[] news)
+    {
+        foreach (var n in news)
+            await Create(n);
+    }
+
     public async Task<IEnumerable<News>> Read(Expression<Func<News, bool>>? where = null)
     {
         logger.LogInformation("Buscando notícias no cache");
         var newsFromCache = await GetNewsFromCache(where);
-        if (newsFromCache != null)
+        if (newsFromCache.Any())
             return newsFromCache;
 
         logger.LogInformation("Buscando notícias no banco de dados");

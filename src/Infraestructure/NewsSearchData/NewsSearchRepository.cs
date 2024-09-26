@@ -7,5 +7,6 @@ public sealed class NewsSearchRepository(AppDbContext dbContext) : INewsSearchRe
     public async Task Create(NewsSearch newsSearch)
     {
         await dbContext.NewsSearchs.AddAsync(newsSearch);
+        await dbContext.SaveChangesAsync();
     }
 }
