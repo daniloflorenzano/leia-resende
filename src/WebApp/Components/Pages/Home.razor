@@ -92,5 +92,14 @@
 @code {
     private IEnumerable<News>? news;
 
-    protected override async Task OnInitializedAsync() => news ??= await getNews.Handle();
+    protected override async Task OnInitializedAsync(){
+        //news ??= await getNews.Handle();
+
+        if (news is null) {
+            var result = await getNews.Handle();
+            if (result is not null) {
+                news = result;
+            }
+        }
+    } 
 }

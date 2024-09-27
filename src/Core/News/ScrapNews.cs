@@ -2,7 +2,7 @@ using Core.News.DataSources;
 
 namespace Core.News;
 
-public sealed class ScrapNews : IObservable<News[]>
+public sealed class ScrapNews : IObservable<News>
 {
     #region Singleton Pattern
     private static ScrapNews? _instance;
@@ -11,20 +11,20 @@ public sealed class ScrapNews : IObservable<News[]>
 
     private ScrapNews()
     {
-        observers = new List<IObserver<News[]>>();
+        observers = new List<IObserver<News>>();
     }
     #endregion
 
     #region Observer Pattern
-    private List<IObserver<News[]>> observers;
+    private List<IObserver<News>> observers;
 
-    private void NotifySubs(News[] news)
+    private void NotifySubs(News news)
     {
         foreach (var observer in observers)
             observer.OnNext(news);
     }
 
-    public IDisposable Subscribe(IObserver<News[]> observer)
+    public IDisposable Subscribe(IObserver<News> observer)
     {
         if (! observers.Contains(observer))
             observers.Add(observer);
@@ -35,10 +35,10 @@ public sealed class ScrapNews : IObservable<News[]>
 
     private class Unsubscriber : IDisposable
     {
-        private List<IObserver<News[]>> _observers;
-        private IObserver<News[]> _observer;
+        private List<IObserver<News>> _observers;
+        private IObserver<News> _observer;
 
-        public Unsubscriber(List<IObserver<News[]>> observers, IObserver<News[]> observer)
+        public Unsubscriber(List<IObserver<News>> observers, IObserver<News> observer)
         {
             _observers = observers;
             _observer = observer;
@@ -60,10 +60,12 @@ public sealed class ScrapNews : IObservable<News[]>
 
         try {
             var news = await diarioDoVale.GetNews();
-            NotifySubs(news);
+            foreach (var n in news)
+                NotifySubs(n);
 
             news = await jornalBeiraRio.GetNews();
-            NotifySubs(news);
+            foreach (var n in news)
+                NotifySubs(n);
         }
         catch (Exception)
         {
