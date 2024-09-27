@@ -3,7 +3,6 @@ using Core.NewsSearchs;
 using Infraestructure;
 using Infraestructure.Azure;
 using Infraestructure.NewsData;
-using Infraestructure.NewsSearchData;
 using WebApp.Components;
 using Quartz;
 
@@ -19,11 +18,10 @@ builder.Services.AddSingleton(azureCosmosDbConfig);
 
 builder.Services.AddLogging(builder => builder.AddConsole());
 
-builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Transient);
 builder.Services.AddScoped<NewsAzureCosmosDb>();
 builder.Services.AddSingleton<NewsMemCache>();
 builder.Services.AddScoped<INewsRepository, NewsRepositoryProxy>();
-builder.Services.AddScoped<INewsSearchRepository, NewsSearchRepository>();
+builder.Services.AddScoped<INewsSearchRepository, NewsSearchAzureCosmosDb>();
 
 builder.Services.AddScoped<GetNews>();
 builder.Services.AddScoped<RegisterNews>();
@@ -42,9 +40,8 @@ builder.Services.AddQuartz(q =>
         .ForJob(scrapNewsJobKey)
         .WithIdentity("ScrapNewsJob-trigger")
         .StartNow()
-        //.WithCronSchedule("0 0 */4 ? * *")); // a cada 4 horas
-        .WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
-
+        .WithCronSchedule("0 0 */3 ? * *")); // a cada 3 horas
+        //.WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

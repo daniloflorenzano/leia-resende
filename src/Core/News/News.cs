@@ -1,40 +1,42 @@
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Core.News;
 
 public sealed class News
 {
-    [JsonPropertyName("id")]
+    [JsonProperty(PropertyName = "id")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [JsonPropertyName("title")]
+    [JsonProperty(PropertyName = "title")]
     public string Title { get; set; } = string.Empty;
 
-    [JsonPropertyName("content")]
+    [JsonProperty(PropertyName = "content")]
     public string Content { get; set; } = string.Empty;
 
-    [JsonPropertyName("author")]
+    [JsonProperty(PropertyName = "author")]
     public string Author { get; set; } = string.Empty;
     
-    [JsonPropertyName("subject")]
+    [JsonProperty(PropertyName = "subject")]
     public SubjectEnum Subject { get; set; }
 
-    [JsonPropertyName("published_at")]
+    [JsonProperty(PropertyName = "publishedAt")]
     public DateTime PublishedAt { get; set; }
 
-    [JsonPropertyName("original_url")]
+    [JsonProperty(PropertyName = "originalUrl")]
     public Uri OriginalUrl { get; set; } = null!;
 
-    [JsonPropertyName("image_url")]
+    [JsonProperty(PropertyName = "imageUrl")]
     public Uri? ImageUrl { get; set; } = null!;
 
     public override string ToString()
     {
-        var json = JsonSerializer.Serialize(this,
-            new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
-        
+        var settings = new JsonSerializerSettings
+        {
+            Converters = new List<JsonConverter> { new StringEnumConverter() },
+            StringEscapeHandling = StringEscapeHandling.EscapeNonAscii
+        };
+        var json = JsonConvert.SerializeObject(this, settings);
         return json;
     }
 }

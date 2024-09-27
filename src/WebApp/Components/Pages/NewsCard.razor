@@ -3,7 +3,14 @@
 <div class="card mb-3">
     <div class="row g-0">
         <div class="col-md-4">
-            <img src="@news.ImageUrl!.AbsoluteUri" alt="@news.Title" class="img-fluid rounded-start">
+            @if(@news.ImageUrl != null)
+            {
+                <img src="@news.ImageUrl?.AbsoluteUri" alt="@news.Title" class="img-fluid rounded-start">
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/300" alt="Imagem não disponível" class="img-fluid rounded-start">
+            }
         </div>
         <div class="col-md-8 position-relative">
             <div class="card-body d-flex flex-column" style="height: 100%;">

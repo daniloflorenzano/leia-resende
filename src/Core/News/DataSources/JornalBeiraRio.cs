@@ -55,6 +55,9 @@ public class JornalBeiraRio(HttpClient httpclient)
 
             var image = article.SelectSingleNode(".//img")?.GetAttributeValue("src", "") ?? null; 
             
+            title = HtmlEntity.DeEntitize(title);
+            content = HtmlEntity.DeEntitize(content);
+
             var news = new News() 
             {
                 Title = title.Trim(),
