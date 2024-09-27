@@ -51,9 +51,10 @@ public class DiarioDoVale(HttpClient httpclient)
             var link = article.SelectSingleNode(".//h2//a").GetAttributeValue("href", ""); 
             var date = article.SelectSingleNode(".//span//time").GetAttributeValue("datetime", ""); 
             var content = article.SelectSingleNode(".//p").InnerText;
+            var image = article.SelectSingleNode(".//div//a")?.GetAttributeValue("data-bgset", "") ?? null;
 
-            var image = article.SelectSingleNode("//a[contains(@class, 'penci-image-holder')]")?.GetAttributeValue("data-bgset", null);
-
+            title = HtmlEntity.DeEntitize(title);
+            content = HtmlEntity.DeEntitize(content);
 
             var news = new News() 
             {
