@@ -15,22 +15,22 @@
         <div class="col-md-8 position-relative">
             <div class="card-body d-flex flex-column" style="height: 100%;">
 
-                <!-- Botão Copiar Link no canto superior direito -->
-                <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2" onclick="copyLink()">
-                    <i class="bi bi-clipboard"></i> Copiar link
-                </button>
-
-                <button class="btn btn-sm btn-light position-absolute top-0 end-0 mt-5 mx-2" onclick="openInNewTab('@news.OriginalUrl.AbsoluteUri')">
-                    <i class="bi bi-box-arrow-up-right"></i> Ir para a notícia
-                </button>
-
                 <h5 class="card-title">@news.Title</h5>
                 <p class="card-text">@news.Content</p>
 
-                <p class="card-text mt-auto">
+                <!-- Alinhamento dos botões com a data no rodapé -->
+                <div class="mt-auto d-flex justify-content-between align-items-center">
                     <small class="text-muted">@news.PublishedAt.ToString("dd/MM/yyyy")</small>
-                </p>
+                    <div>
+                        <button class="btn btn-sm btn-light me-2" onclick="copyLink('@news.OriginalUrl.AbsoluteUri')">
+                            <i class="bi bi-clipboard"></i> Copiar link
+                        </button>
 
+                        <button class="btn btn-sm btn-light" onclick="openInNewTab('@news.OriginalUrl.AbsoluteUri')">
+                            <i class="bi bi-box-arrow-up-right"></i> Ir para a notícia
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -45,32 +45,35 @@
         object-fit: cover;
         height: 100%;
     }
+
+    /* Estilos para garantir que os botões fiquem alinhados ao final do card */
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 </style>
 
 <script>
-    function copyLink() {
-        // Substitua pelo link que deseja copiar
-        const link = "@news.OriginalUrl.AbsoluteUri";
+    function copyLink(link) {
         navigator.clipboard.writeText(link).then(function() {
-            // Exibir Toastify
             Toastify({
                 text: "Link copiado com sucesso!",
-                duration: 3000,  // duração da notificação (3 segundos)
-                close: true,  // botão de fechar
-                gravity: "top",  // posição (topo)
-                position: "right",  // posição (à direita)
-                backgroundColor: "#4CAF50",  // cor de fundo (verde)
-                stopOnFocus: true,  // para parar ao focar a notificação
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4CAF50",
+                stopOnFocus: true,
             }).showToast();
         }, function(err) {
-            // Exibir erro se não for possível copiar
             Toastify({
                 text: "Erro ao copiar o link!",
                 duration: 3000,
                 close: true,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "#f44336",  // cor de fundo (vermelho)
+                backgroundColor: "#f44336",
                 stopOnFocus: true,
             }).showToast();
         });
