@@ -67,7 +67,8 @@ public class DiarioDoVale(HttpClient httpclient)
                 Subject = subject
             };
 
-            newsCollection.Add(news);
+            if (news.Content.StartsWith("Resende") || news.Content.StartsWith("Sul Fluminense") || news.Subject != SubjectEnum.Woman)
+                newsCollection.Add(news);
         }
 
         return Task.FromResult(newsCollection.ToArray());

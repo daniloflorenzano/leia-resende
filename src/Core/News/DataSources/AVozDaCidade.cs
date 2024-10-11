@@ -71,11 +71,13 @@ public class AVozDaCidade (HttpClient httpclient)
                 PublishedAt = DateTime.Parse(date),
                 Content = content.Trim(),
                 ImageUrl = image is null ? null : new Uri(image), 
-                Author = "Diario do Vale",
+                Author = "A Voz da Cidade",
                 Subject = subject
             };
 
-            newsCollection.Add(news);
+            if (news.Content.StartsWith("Resende") || news.Content.StartsWith("Sul Fluminense") || news.Subject != SubjectEnum.Woman)
+                newsCollection.Add(news);
+
         }
 
         return Task.FromResult(newsCollection.ToArray());

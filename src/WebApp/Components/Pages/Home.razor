@@ -33,9 +33,10 @@
         </div>
 
         <div class="news-grid">
-            @foreach (var group in news.GroupBy(n => n.Subject))
+            @* @foreach (var group in news.GroupBy(n => n.Subject))
             {
-                <h2 class="news-section-title">@group.Key</h2>
+                var topicTranslated = group.First().GetSubjectInPtBr();
+                <h2 class="news-section-title">@topicTranslated</h2>
 
                 <div class="row">
                     @foreach (var item in group.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
@@ -47,7 +48,17 @@
                         </div>
                     }
                 </div>
-            }
+            } *@
+            <div class="row">
+                @foreach (var item in news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="news-card">
+                            <NewsCard news="@item"/>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     }
     else
