@@ -57,13 +57,18 @@ public sealed class ScrapNews : IObservable<News>
         var httpClient = new HttpClient();
         var diarioDoVale = new DiarioDoVale(httpClient);
         var jornalBeiraRio = new JornalBeiraRio(httpClient);
+        var aVozDaCidade = new AVozDaCidade(httpClient);
 
         try {
             var news = await diarioDoVale.GetNews();
             foreach (var n in news)
                 NotifySubs(n);
-
+            
             news = await jornalBeiraRio.GetNews();
+            foreach (var n in news)
+                NotifySubs(n);
+            
+            news = await aVozDaCidade.GetNews();
             foreach (var n in news)
                 NotifySubs(n);
         }

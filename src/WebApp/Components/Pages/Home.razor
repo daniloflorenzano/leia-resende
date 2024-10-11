@@ -1,23 +1,46 @@
 ﻿@page "/"
 @using Core.News
+@using System.Linq;
 @inject GetNews getNews;
 
-<PageTitle>Página Inicial</PageTitle>
+<PageTitle>Home - Todas as Notícias</PageTitle>
 
 <div class="container">
-    <h1 class="text-center mt-4">
-        Leia Resende
-        <i class="bi bi-brightness-high-fill" id="themeIcon" onclick="toggleTheme()" style="cursor: pointer;"></i>
-    </h1>
-    <p class="text-center">Agregador de notícias</p>
-
+    <div class="text-center mt-4 mb-4">
+        <h1 class="site-title">
+            Leia Resende
+            <i class="bi bi-brightness-high-fill theme-toggle" id="themeIcon" onclick="toggleTheme()" style="cursor: pointer;"></i>
+        </h1>
+        <p class="site-subtitle">Agregador de notícias</p>
+    </div>
+    
+    <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
+        <a href="/" class="topic-btn">Home</a>
+        @if (news != null)
+        {
+            @foreach (var subject in news.Select(n => n.Subject).Distinct())
+            {
+                <a href="@($"/subject/{subject}")" class="topic-btn">@subject</a>
+            }
+        }
+    </div>
+    
     @if (news != null)
     {
-        <div class="d-flex flex-column align-items-center">
-            @foreach (var item in news)
+        <div class="news-grid">
+            @foreach (var group in news.GroupBy(n => n.Subject))
             {
-                <div class="col-md-4 mb-3 w-75">
-                    <NewsCard news="@item" />
+                <h2 class="news-section-title">@group.Key</h2>
+
+                <div class="row">
+                    @foreach (var item in group.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
+                    {
+                        <div class="col-md-4 mb-3">
+                            <div class="news-card">
+                                <NewsCard news="@item"/>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -26,7 +49,117 @@
     {
         <p class="text-center">Carregando...</p>
     }
+
 </div>
+
+<footer class="footer">
+    <p>© 2024 Leia Resende - Todos os direitos reservados.</p>
+</footer>
+
+<style>
+    body {
+        transition: background-color 0.5s, color 0.5s;
+    }
+
+    .dark-theme {
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+    }
+
+    .container {
+        padding: 0 2rem;
+    }
+
+    .site-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #333;
+        transition: color 0.3s;
+    }
+
+    .dark-theme .site-title {
+        color: #f0f0f0;
+    }
+
+    .site-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+    }
+    
+    .topics-header {
+        margin-bottom: 2rem;
+    }
+
+    .topic-btn {
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        background-color: #007bff;
+        color: white;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .topic-btn:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    .dark-theme .topic-btn {
+        background-color: #555;
+    }
+
+    .news-grid {
+        margin-top: 2rem;
+    }
+
+    .news-section-title {
+        font-size: 2rem;
+        color: #007bff;
+        margin-top: 2rem;
+    }
+
+    .news-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 1rem; 
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+    }
+
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-theme .news-card {
+        background-color: #333;
+    }
+
+    .theme-toggle {
+        font-size: 1.5rem;
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 2rem 0;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .dark-theme .footer {
+        background-color: #222;
+        color: #aaa;
+    }
+</style>
 
 <script>
     function applySavedTheme() {
@@ -46,60 +179,30 @@
         if (body.classList.contains("dark-theme")) {
             icon.classList.remove("bi-brightness-high-fill");
             icon.classList.add("bi-moon");
-            localStorage.setItem("theme", "dark"); // Salva a preferência como "dark"
+            localStorage.setItem("theme", "dark");
         } else {
             icon.classList.remove("bi-moon");
             icon.classList.add("bi-brightness-high-fill");
-            localStorage.setItem("theme", "light"); // Salva a preferência como "light"
+            localStorage.setItem("theme", "light");
         }
     }
 
-    // Aplica o tema salvo quando a página é carregada
     document.addEventListener("DOMContentLoaded", applySavedTheme);
 </script>
-
-
-<style>
-    body {
-        background-color: white;
-        color: black;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    .dark-theme {
-        background-color: black;
-        color: white;
-    }
-
-    .card {
-        background-color: white;
-        /* Cor padrão do card */
-        color: black;
-        /* Cor padrão do texto */
-        transition: background-color 0.3s, color 0.3s;
-        /* Transição suave */
-    }
-
-    .dark-theme .card {
-        background-color: #333;
-        /* Cor do card no modo escuro */
-        color: white;
-        /* Cor do texto no modo escuro */
-    }
-</style>
-
 
 @code {
     private IEnumerable<News>? news;
 
-    protected override async Task OnInitializedAsync(){
-        //news ??= await getNews.Handle();
-
-        if (news is null) {
+    protected override async Task OnInitializedAsync()
+    {
+        if (news is null)
+        {
             var result = await getNews.Handle();
-            if (result is not null) {
+            if (result is not null)
+            {
                 news = result;
             }
         }
-    } 
+    }
+
 }
