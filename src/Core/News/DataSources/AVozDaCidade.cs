@@ -7,12 +7,12 @@ public class AVozDaCidade (HttpClient httpclient)
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
-        news.AddRange(await GetEconomicNews());
+        news.AddRange(await GetEconomyNews());
         news.AddRange(await GetWomanNews());
         return news.ToArray();
     }
 
-    private async Task<News[]> GetEconomicNews()
+    private async Task<News[]> GetEconomyNews()
     {
         var response = await httpclient.GetAsync("https://avozdacidade.com/wp/editorias/economia/");
         var html = await response.Content.ReadAsStringAsync();
@@ -22,7 +22,7 @@ public class AVozDaCidade (HttpClient httpclient)
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollections = await CreateNewsObject(articles, SubjectEnum.Economic);
+        var newsCollections = await CreateNewsObject(articles, SubjectEnum.Economy);
         return newsCollections;
     }
     

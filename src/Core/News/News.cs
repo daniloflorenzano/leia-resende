@@ -32,4 +32,17 @@ public sealed class News
         var json = JsonConvert.SerializeObject(this, settings);
         return json;
     }
+
+    public string GetSubjectInPtBr()
+    {
+        return Subject switch
+        {
+            SubjectEnum.Sports => "Esportes",
+            SubjectEnum.Politics => "Política",
+            SubjectEnum.Economy => "Economia",
+            SubjectEnum.Health => "Saúde",
+            SubjectEnum.Woman => "Mulher",
+            _ => "Outros"
+        };
+    }
 }

@@ -1,9 +1,10 @@
 ﻿@page "/"
 @using Core.News
 @using System.Linq;
+@rendermode InteractiveServer
 @inject GetNews getNews;
 
-<PageTitle>Home - Todas as Notícias</PageTitle>
+<PageTitle>Página inicial - Todas as Notícias</PageTitle>
 
 <div class="container">
     <div class="text-center mt-4 mb-4">
@@ -14,19 +15,23 @@
         <p class="site-subtitle">Agregador de notícias</p>
     </div>
     
-    <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
-        <a href="/" class="topic-btn">Home</a>
-        @if (news != null)
-        {
-            @foreach (var subject in news.Select(n => n.Subject).Distinct())
-            {
-                <a href="@($"/subject/{subject}")" class="topic-btn">@subject</a>
-            }
-        }
-    </div>
+    
     
     @if (news != null)
     {
+        <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
+            <button class="topic-btn" @onclick="@SetSubjectAsNull">Todas</button>
+            @if (news != null && SubjectDict != null)
+            {
+                @foreach (var subject in SubjectDict)
+                {
+                    <button class="topic-btn" @onclick="@(() => SetSubject(subject.Key))">
+                        @subject.Value
+                    </button>
+                }
+            }
+        </div>
+
         <div class="news-grid">
             @foreach (var group in news.GroupBy(n => n.Subject))
             {
@@ -192,6 +197,8 @@
 
 @code {
     private IEnumerable<News>? news;
+    private Dictionary<SubjectEnum, string>? SubjectDict;
+    private SubjectEnum? selectedSubject = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -201,8 +208,45 @@
             if (result is not null)
             {
                 news = result;
+                LoadSubjectDict();
             }
         }
     }
 
+    private void LoadSubjectDict(){
+        if (news != null)
+        {
+            SubjectDict = news
+            .GroupBy(n => n.Subject)
+            .ToDictionary(g => g.Key, g => g.First().GetSubjectInPtBr());
+        }
+    }
+
+    private async Task SetSubject(SubjectEnum subject)
+    {
+        selectedSubject = subject;
+        await UpdateNews();
+    }
+
+    private async Task SetSubjectAsNull()
+    {
+        selectedSubject = null;
+        await UpdateNews();
+    }
+
+    private async Task UpdateNews()
+    {
+        if (selectedSubject is not null)
+        {
+            news = news!.Where(n => n.Subject == selectedSubject);
+        }
+        else
+        {
+            var result = await getNews.Handle();
+            if (result is not null)
+            {
+                news = result;
+            }
+        }
+    }
 }
