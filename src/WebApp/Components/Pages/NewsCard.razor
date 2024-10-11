@@ -18,17 +18,17 @@
                 <h5 class="card-title">
                     <a href="@news.OriginalUrl.AbsoluteUri" target="_blank" class="custom-link">@news.Title</a>
                 </h5>
-                <p class="card-text">@news.Content</p>
+                <p class="card-text">@news.GetFormatedContent()</p>
 
                 <!-- Alinhamento dos botões com a data no rodapé -->
                 <div class="mt-auto d-flex justify-content-between align-items-center">
                     <small class="text-muted">@news.PublishedAt.ToString("dd/MM/yyyy")</small>
                     <div>
-                        <button class="btn btn-sm btn-light me-2" onclick="copyLink('@news.OriginalUrl.AbsoluteUri')">
+                        <button class="btn btn-sm btn-light me-2" style="margin-left: 20px" onclick="copyLink('@news.OriginalUrl.AbsoluteUri')">
                             <i class="bi bi-clipboard"></i> Copiar link
                         </button>
 
-                        <button class="btn btn-sm btn-light" onclick="openInNewTab('@news.OriginalUrl.AbsoluteUri')">
+                        <button class="btn btn-sm btn-light" style="margin-left: 20px; margin-top: 10px" onclick="openInNewTab('@news.OriginalUrl.AbsoluteUri')">
                             <i class="bi bi-box-arrow-up-right"></i> Ir para a notícia
                         </button>
                     </div>

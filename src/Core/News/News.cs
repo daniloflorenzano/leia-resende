@@ -45,4 +45,8 @@ public sealed class News
             _ => "Outros"
         };
     }
+
+    public string GetFormatedContent() {
+        return Content.Length > 200 ? Content.Substring(0, 200) + "..." : Content;
+    }
 }
