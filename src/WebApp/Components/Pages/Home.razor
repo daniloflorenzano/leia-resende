@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using Core.News
 @using System.Linq;
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject GetNews getNews;
 
 <PageTitle>Página inicial - Todas as Notícias</PageTitle>
@@ -146,6 +146,10 @@
         background-color: #333;
     }
 
+    .dark-theme .card {
+        background-color: #333;
+    }
+
     .theme-toggle {
         font-size: 1.5rem;
         margin-left: 0.5rem;
@@ -202,7 +206,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (news is null)
+        if (news is null)   
         {
             var result = await getNews.Handle();
             if (result is not null)
@@ -212,6 +216,7 @@
             }
         }
     }
+    
 
     private void LoadSubjectDict(){
         if (news != null)
