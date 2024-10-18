@@ -8,17 +8,15 @@ namespace Infraestructure.Azure;
 
 public sealed class NewsAzureCosmosDb : INewsRepository
 {
-    private readonly Container container;
-
-    private readonly ILogger<NewsAzureCosmosDb> logger; 
+    private readonly Container _container;
+    private readonly ILogger<NewsAzureCosmosDb> _logger; 
 
     public NewsAzureCosmosDb(AzureCosmosDbConfig azureCosmosDbConfig, ILogger<NewsAzureCosmosDb> logger)
     {
         var cosmosClient = new CosmosClient(azureCosmosDbConfig.Endpoint, azureCosmosDbConfig.SecretKey);
         var database = cosmosClient.GetDatabase(azureCosmosDbConfig.DatabaseName);
-        container = database.GetContainer("News");
-
-        this.logger = logger;
+        _container = database.GetContainer("News");
+        _logger = logger;
     }
 
     public async Task Create(News news) => await AddItemsToContainerAsync(news);
@@ -27,17 +25,17 @@ public sealed class NewsAzureCosmosDb : INewsRepository
     {
         try
         {            
-            var payload = new NewsPayload(news.Id.ToString(), news.Title, news.Content, news.Author, news.Subject.ToString(), news.PublishedAt, news.OriginalUrl.ToString(), news.ImageUrl?.ToString());
-            var newsResponse = await container.CreateItemAsync(payload);
-            logger.LogInformation("Notícia adicionada com sucesso: {0}, id: {1}", payload.title, newsResponse.Resource.id);
+            var payload = new NewsPayload(news.Id, news.Title, news.Content, news.Author, news.Subject.ToString(), news.PublishedAt, news.OriginalUrl.ToString(), news.ImageUrl?.ToString());
+            var newsResponse = await _container.CreateItemAsync(payload);
+            _logger.LogInformation("Notícia adicionada com sucesso: {title}, id: {id}", payload.title, newsResponse.Resource.id);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            logger.LogWarning("Notícia já existe: {0}", news.Title);
+            _logger.LogWarning("Notícia já existe: {title}", news.Title);
         }
         catch (Exception ex)
         {
-            logger.LogError("Erro ao adicionar notícia: {0}", ex.Message);
+            _logger.LogError("Erro ao adicionar notícia: {message}", ex.Message);
         }
     }
 
@@ -45,7 +43,7 @@ public sealed class NewsAzureCosmosDb : INewsRepository
     {
         try
         {
-            var query = container.GetItemLinqQueryable<News>(true)
+            var query = _container.GetItemLinqQueryable<News>(true)
                                  .Where(where ?? (news => true))
                                  .ToFeedIterator();
 
@@ -60,7 +58,7 @@ public sealed class NewsAzureCosmosDb : INewsRepository
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            logger.LogWarning("Parece que nao ha nada no banco, continuando...");
+            _logger.LogWarning("Parece que nao ha nada no banco, continuando...");
             return [];
         }        
     }

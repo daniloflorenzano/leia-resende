@@ -58,16 +58,15 @@ public class JornalBeiraRio(HttpClient httpclient)
             title = HtmlEntity.DeEntitize(title);
             content = HtmlEntity.DeEntitize(content);
 
-            var news = new News() 
-            {
-                Title = title.Trim(),
-                OriginalUrl = new Uri(link),
-                PublishedAt = DateTime.Parse(date),
-                Content = content,
-                ImageUrl = image is null ? null : new Uri(image),
-                Author = "Jornal Beira Rio",
-                Subject = subject
-            };
+            var news = new News(
+                title.Trim(),
+                content.Trim(),
+                "Jornal Beira Rio",
+                subject,
+                DateTime.Parse(date),
+                new Uri(link),
+                image is null ? null : new Uri(image)
+            );
 
             newsCollection.Add(news);
         }

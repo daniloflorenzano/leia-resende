@@ -55,17 +55,16 @@ public class DiarioDoVale(HttpClient httpclient)
 
             title = HtmlEntity.DeEntitize(title);
             content = HtmlEntity.DeEntitize(content);
-
-            var news = new News() 
-            {
-                Title = title.Trim(),
-                OriginalUrl = new Uri(link),
-                PublishedAt = DateTime.Parse(date),
-                Content = content,
-                ImageUrl = image is null ? null : new Uri(image), 
-                Author = "Diario do Vale",
-                Subject = subject
-            };
+            
+            var news = new News(
+                title.Trim(),
+                content.Trim(),
+                "Diario do Vale",
+                subject,
+                DateTime.Parse(date),
+                new Uri(link),
+                image is null ? null : new Uri(image)
+            );
 
             if (news.Content.StartsWith("Resende") || news.Content.StartsWith("Sul Fluminense") || news.Subject == SubjectEnum.Woman)
                 newsCollection.Add(news);
