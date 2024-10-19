@@ -14,9 +14,8 @@
         </h1>
         <p class="site-subtitle">Agregador de notícias</p>
     </div>
-    
-    
-    
+
+
     @if (news != null)
     {
         <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
@@ -32,33 +31,15 @@
             }
         </div>
 
-        <div class="news-grid">
-            @* @foreach (var group in news.GroupBy(n => n.Subject))
+        <div class="d-flex flex-wrap justify-content-start gap-4">
+            @foreach (var item in news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
             {
-                var topicTranslated = group.First().GetSubjectInPtBr();
-                <h2 class="news-section-title">@topicTranslated</h2>
-
-                <div class="row">
-                    @foreach (var item in group.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
-                    {
-                        <div class="col-md-4 mb-3">
-                            <div class="news-card">
-                                <NewsCard news="@item"/>
-                            </div>
-                        </div>
-                    }
-                </div>
-            } *@
-            <div class="row">
-                @foreach (var item in news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
-                {
-                    <div class="col-md-4 mb-3">
-                        <div class="news-card">
-                            <NewsCard news="@item"/>
-                        </div>
+                <div class="col-md-3" style="max-width: 21rem; min-width: 16rem">
+                    <div class="news-card">
+                        <NewsCard news="@item"/>
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
     }
     else
@@ -78,12 +59,13 @@
     }
 
     .dark-theme {
-        background-color: #1a1a1a;
+        background-color: #0e1217;
         color: #f0f0f0;
     }
 
     .container {
         padding: 0 2rem;
+        max-width: 1860px;
     }
 
     .site-title {
@@ -126,41 +108,23 @@
         background-color: #555;
     }
 
-    .news-grid {
-        margin-top: 2rem;
-    }
-
-    .news-section-title {
-        font-size: 2rem;
-        color: #007bff;
-        margin-top: 2rem;
-    }
-
     .news-card {
         background-color: white;
-        border-radius: 12px;
+        border-radius: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 1rem; 
         transition: transform 0.3s, box-shadow 0.3s;
-        height: 100%; 
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between; 
+        height: 100%;
     }
-
+    
     .news-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
 
-    .dark-theme .news-card {
-        background-color: #333;
+    .dark-theme .news-card .card {
+        background-color: #1c1f26;
     }
-
-    .dark-theme .card {
-        background-color: #333;
-    }
-
+    
     .theme-toggle {
         font-size: 1.5rem;
         margin-left: 0.5rem;
@@ -217,7 +181,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (news is null)   
+        if (news is null)
         {
             var result = await getNews.Handle();
             if (result is not null)
@@ -227,14 +191,15 @@
             }
         }
     }
-    
 
-    private void LoadSubjectDict(){
+
+    private void LoadSubjectDict()
+    {
         if (news != null)
         {
             SubjectDict = news
-            .GroupBy(n => n.Subject)
-            .ToDictionary(g => g.Key, g => g.First().GetSubjectInPtBr());
+                .GroupBy(n => n.Subject)
+                .ToDictionary(g => g.Key, g => g.First().GetSubjectInPtBr());
         }
     }
 
@@ -265,4 +230,5 @@
             }
         }
     }
+
 }

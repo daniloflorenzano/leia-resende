@@ -88,9 +88,18 @@ main {
     z-index: 1000;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+
+    
+@media (max-width: 768px) {
+    .content {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
+}
