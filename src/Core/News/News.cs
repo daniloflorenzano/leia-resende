@@ -13,6 +13,8 @@ public sealed class News
 
     public string Author { get; set; } = string.Empty;
     
+    public Uri AuthorIconUrl { get; set; } = null!;
+    
     public SubjectEnum Subject { get; set; }
 
     public DateTime PublishedAt { get; set; }
@@ -26,11 +28,12 @@ public sealed class News
     {
     }
     
-    public News(string title, string content, string author, SubjectEnum subject, DateTime publishedAt, Uri originalUrl, Uri? imageUrl)
+    public News(string title, string content, string author, Uri authorIconUrl, SubjectEnum subject, DateTime publishedAt, Uri originalUrl, Uri? imageUrl)
     {
         Title = title;
         Content = content;
         Author = author;
+        AuthorIconUrl = authorIconUrl;
         Subject = subject;
         PublishedAt = publishedAt;
         OriginalUrl = originalUrl;
@@ -38,8 +41,15 @@ public sealed class News
         
         Id = GenerateId();  
     }
-    
-    private string GenerateId() => Math.Abs((Title + PublishedAt).GetHashCode()).ToString();
+
+    private string GenerateId()
+    {
+        var hash = new HashCode();
+        hash.Add(Title);
+        hash.Add(PublishedAt);
+        hash.Add(OriginalUrl);
+        return hash.ToHashCode().ToString();
+    }
 
     public override string ToString()
     {
@@ -65,7 +75,7 @@ public sealed class News
         };
     }
 
-    public string GetFormatedContent() {
-        return Content.Length > 200 ? Content.Substring(0, 200) + "..." : Content;
+    public string GetFormatedTitle() {
+        return Content.Length > 100 ? Content.Substring(0, 97) + "..." : Content;
     }
 }

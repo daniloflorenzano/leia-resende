@@ -2,13 +2,14 @@
 
 <div class="card">
     <div class="card-body">
-        <p class="card-text mb-2" style="font-weight: bolder; font-size: 1.2rem">@news.Title</p>
-        <div class="d-flex justify-content-between align-items-center">
+        <p><img class="source-icon" src="@news.AuthorIconUrl" alt="icone da fonte da noticia"/> @news.Author</p>
+        <p class="card-text mb-2" style="font-weight: bolder; font-size: 1.2rem">@news.GetFormatedTitle()</p>
+        <div class="d-flex justify-content-between align-items-center" style="margin-top: auto">
             <small class="text-muted">@news.PublishedAt.ToString("dd/MM/yyyy")</small>
         </div>
     </div>
 
-    @if (@news.ImageUrl != null)
+    @if (news.ImageUrl != null)
     {
         <img src="@news.ImageUrl?.AbsoluteUri" alt="@news.Title" class="img-fluid rounded-start card-img-top">
     }
@@ -16,8 +17,6 @@
     {
         <img src="https://via.placeholder.com/300" alt="Imagem não disponível" class="img-fluid rounded-start card-img-top">
     }
-
-    @* <img src="@news.ImageUrl" class="card-img-top" alt="..."> *@
 </div>
 
 <style>
@@ -27,16 +26,22 @@
         height: 100%;
     }
 
+    .source-icon{
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
     .img-fluid {
         height: 200px;
         border-radius: 20px !important;
     }
-
-    /* Estilos para garantir que os botões fiquem alinhados ao final do card */
+    
     .card-body {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
     }
 
     .custom-link {

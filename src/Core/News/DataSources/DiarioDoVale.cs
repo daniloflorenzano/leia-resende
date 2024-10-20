@@ -5,6 +5,9 @@ namespace Core.News.DataSources;
 
 public class DiarioDoVale(HttpClient httpclient)
 {
+    private const string SourceName = "Diario do Vale";
+    private const string SourceIconUrl = "https://diariodovale.com.br/wp-content/uploads/2024/04/logo-site-dv.png";
+    
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
@@ -59,14 +62,15 @@ public class DiarioDoVale(HttpClient httpclient)
             var news = new News(
                 title.Trim(),
                 content.Trim(),
-                "Diario do Vale",
+                SourceName,
+                new Uri(SourceIconUrl),
                 subject,
                 DateTime.Parse(date),
                 new Uri(link),
                 image is null ? null : new Uri(image)
             );
 
-            if (news.Content.StartsWith("Resende") || news.Content.StartsWith("Sul Fluminense") || news.Subject == SubjectEnum.Woman)
+            if (news.Content.StartsWith("Resende", StringComparison.InvariantCultureIgnoreCase) || news.Content.StartsWith("Sul Fluminense", StringComparison.InvariantCultureIgnoreCase))
                 newsCollection.Add(news);
         }
 

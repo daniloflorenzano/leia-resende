@@ -4,6 +4,9 @@ namespace Core.News.DataSources;
 
 public class AVozDaCidade(HttpClient httpclient)
 {
+    private const string SourceName = "A Voz da Cidade";
+    private const string SourceIconUrl = "https://avozdacidade.com/wp/wp-content/uploads/2022/08/LOGO-A-VOZ-DA-CIDADE.jpg";
+    
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
@@ -68,15 +71,15 @@ public class AVozDaCidade(HttpClient httpclient)
             var news = new News(
                 title.Trim(),
                 content.Trim(),
-                "A Voz da Cidade",
+                SourceName,
+                new Uri(SourceIconUrl),
                 subject,
                 DateTime.Parse(date),
                 new Uri(link),
                 image is null ? null : new Uri(image)
             );
             
-            if (news.Content.StartsWith("Resende") || news.Content.StartsWith("Sul Fluminense") ||
-                news.Subject == SubjectEnum.Woman)
+            if (news.Content.StartsWith("Resende", StringComparison.InvariantCultureIgnoreCase) || news.Content.StartsWith("Sul Fluminense", StringComparison.InvariantCultureIgnoreCase))
                 newsCollection.Add(news);
         }
 

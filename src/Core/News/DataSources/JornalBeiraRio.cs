@@ -4,6 +4,9 @@ namespace Core.News.DataSources;
 
 public class JornalBeiraRio(HttpClient httpclient)
 {
+    private const string SourceName = "Jornal Beira Rio";
+    private const string SourceIconUrl = "https://jornalbeirario.com.br/portal/wp-content/uploads/2017/09/beira_rio_icon-150x150.png";
+    
     public async Task<News[]> GetNews(){
         var news = new List<News>();
         news.AddRange(await GetPolitcsNews());
@@ -61,7 +64,8 @@ public class JornalBeiraRio(HttpClient httpclient)
             var news = new News(
                 title.Trim(),
                 content.Trim(),
-                "Jornal Beira Rio",
+                SourceName,
+                new Uri(SourceIconUrl),
                 subject,
                 DateTime.Parse(date),
                 new Uri(link),

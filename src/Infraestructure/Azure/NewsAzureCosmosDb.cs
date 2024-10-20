@@ -5,7 +5,7 @@ using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace Infraestructure.Azure;
-
+ 
 public sealed class NewsAzureCosmosDb : INewsRepository
 {
     private readonly Container _container;
@@ -25,8 +25,8 @@ public sealed class NewsAzureCosmosDb : INewsRepository
     {
         try
         {            
-            var payload = new NewsPayload(news.Id, news.Title, news.Content, news.Author, news.Subject.ToString(), news.PublishedAt, news.OriginalUrl.ToString(), news.ImageUrl?.ToString());
-            var newsResponse = await _container.CreateItemAsync(payload);
+            var payload = new NewsPayload(news.Id, news.Title, news.Content, news.Author, news.AuthorIconUrl.ToString(), news.Subject.ToString(), news.PublishedAt, news.OriginalUrl.ToString(), news.ImageUrl?.ToString());
+            var newsResponse = await _container.UpsertItemAsync(payload);
             _logger.LogInformation("Notícia adicionada com sucesso: {title}, id: {id}", payload.title, newsResponse.Resource.id);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
@@ -64,4 +64,4 @@ public sealed class NewsAzureCosmosDb : INewsRepository
     }
 }
 
-public record NewsPayload(string id, string title, string content, string author, string subject, DateTime publishedAt, string originalUrl, string? imageUrl);
+public record NewsPayload(string id, string title, string content, string author, string authorIconUrl, string subject, DateTime publishedAt, string originalUrl, string? imageUrl);
