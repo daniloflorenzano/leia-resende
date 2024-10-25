@@ -76,6 +76,6 @@ public sealed class News
     }
 
     public string GetFormatedTitle() {
-        return Content.Length > 100 ? Content.Substring(0, 97) + "..." : Content;
+        return Content.Length > 100 ? Content.Substring(0, 97).Trim() + "..." : Content;
     }
 }
