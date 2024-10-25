@@ -31,6 +31,8 @@ scrapNews.Subscribe(registerNews!);
 
 builder.Services.AddScoped<RegisterNewsSearch>();
 
+builder.Services.AddBlazorBootstrap();
+
 builder.Services.AddQuartz(q =>
 {
     var scrapNewsJobKey = new JobKey("ScrapNewsJob");
