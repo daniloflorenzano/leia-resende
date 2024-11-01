@@ -306,19 +306,16 @@
     private async Task FilterNews(string? searchText = null)
     {
         if (selectedSubject is not null)
-        {
             news = news!.Where(n => n.Subject == selectedSubject);
-
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-            }
-
-            return;
+        
+        if (!string.IsNullOrEmpty(searchText))
+            news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        
+        if (selectedSubject is null && string.IsNullOrEmpty(searchText))
+        {
+            var result = await getNews.Handle();
+            news = result;
         }
-
-        var result = await getNews.Handle();
-        news = result;
     }
 
 
