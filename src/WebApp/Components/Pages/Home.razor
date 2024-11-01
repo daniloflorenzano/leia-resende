@@ -8,7 +8,7 @@
 <PageTitle>Página inicial - Todas as Notícias</PageTitle>
 
 <div class="container">
-    <Modal @ref="_modal" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.Large">
+    <Modal @ref="_modal" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.Large"  class="news-modal">
         <HeaderTemplate>
             <div class="modal-header border-0 pb-0">
                 <NewsSujectBadge news="@_newsItem"/>
@@ -196,6 +196,11 @@
         background-color: #222;
         color: #aaa;
     }
+    
+    .dark-theme .modal-content {
+        background-color: #1c1f26;
+        color: #f0f0f0;
+    }
 </style>
 
 <script>
@@ -264,6 +269,15 @@
             var result = await getNews.Handle();
             news = result;
             LoadSubjectDict();
+        }
+        
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("applySavedTheme");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao aplicar tema salvo: {ex.Message}");
         }
     }
 
