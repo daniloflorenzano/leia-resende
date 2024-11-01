@@ -13,7 +13,7 @@ public sealed class News
 
     public string Author { get; set; } = string.Empty;
     
-    public Uri AuthorIconUrl { get; set; } = null!;
+    public Uri? AuthorIconUrl { get; set; }
     
     public SubjectEnum Subject { get; set; }
 
@@ -76,6 +76,6 @@ public sealed class News
     }
 
     public string GetFormatedTitle() {
-        return Content.Length > 100 ? Content.Substring(0, 97).Trim() + "..." : Content;
+        return Title.Length > 100 ? Title.Substring(0, 97).Trim() + "..." : Title;
     }
 }

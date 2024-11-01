@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IJSRuntime JSRuntime
 @using Core.News
 @using System.Linq;
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
@@ -7,19 +8,59 @@
 <PageTitle>Página inicial - Todas as Notícias</PageTitle>
 
 <div class="container">
-
-    <Modal @ref="modal" title="Modal title" IsVerticallyCentered="true" IsScrollable="true">
+    <Modal @ref="_modal" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.Large">
+        <HeaderTemplate>
+            <div class="modal-header border-0 pb-0">
+                <NewsSujectBadge news="@_newsItem"/>
+                <CloseButton OnClick="OnHideModalClick"/>
+            </div>
+        </HeaderTemplate>
         <BodyTemplate>
-            <h5>@newsItem.GetFormatedTitle()</h5>
-            <p style="margin-bottom: 100vh;">@newsItem.Content</p>
+            <div class="modal-body">
+                @if (_newsItem.ImageUrl is not null)
+                {
+                    <img src="@_newsItem.ImageUrl" class="img-fluid rounded mb-3" alt="@_newsItem.Title"/>
+                }
+
+                <h2 class="mb-4">@_newsItem.Title</h2>
+
+                <div class="d-flex align-items-center mb-4">
+                    @if (_newsItem.AuthorIconUrl is not null)
+                    {
+                        <img src="@_newsItem.AuthorIconUrl" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="@_newsItem.Author"/>
+                    }
+                    <div>
+                        <div class="fw-bold">@_newsItem.Author</div>
+                        <small class="text-muted">@_newsItem.PublishedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                </div>
+
+                <div class="content mb-4">
+                    @((MarkupString)FormatContent(_newsItem.Content))
+                </div>
+
+
+                <div class="text-end">
+                    <a href="@_newsItem.OriginalUrl" target="_blank" class="btn btn-link">
+                        Ler notícia original
+                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                    </a>
+                </div>
+
+            </div>
         </BodyTemplate>
         <FooterTemplate>
-            <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Fechar</Button>
-            <Button Color="ButtonColor.Primary">Save changes</Button>
+            <div class="modal-footer border-0">
+                <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Fechar</Button>
+                <Button Color="ButtonColor.Primary" @onclick="ShareNews">
+                    <i class="bi bi-share me-1"></i>
+                    Compartilhar
+                </Button>
+            </div>
         </FooterTemplate>
     </Modal>
-    
-    
+
+
     <div class="text-center mt-4 mb-4">
         <h1 class="site-title">
             Leia Resende
@@ -32,16 +73,13 @@
     @if (news != null)
     {
         <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
-            <button class="topic-btn" @onclick="@SetSubjectAsNull">Todas</button>
-            @if (news != null && SubjectDict != null)
-            {
-                @foreach (var subject in SubjectDict)
-                {
-                    <button class="topic-btn" @onclick="@(() => SetSubject(subject.Key))">
-                        @subject.Value
-                    </button>
-                }
-            }
+            <div class="col-12 col-md-8 col-lg-6">
+                <NewsFilter
+                    SelectedSubject="@selectedSubject"
+                    SelectedSubjectChanged="@(subject => HandleSubjectChange(subject))"
+                    SubjectDict="@SubjectDict"
+                    OnSearch="@HandleSearch"/>
+            </div>
         </div>
 
         <div class="d-flex flex-wrap justify-content-start gap-4">
@@ -132,10 +170,12 @@
     .news-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
     }
 
     .dark-theme .news-card .card {
         background-color: #1c1f26;
+        color: #f0f0f0;
     }
     
     .theme-toggle {
@@ -185,6 +225,31 @@
     }
 
     document.addEventListener("DOMContentLoaded", applySavedTheme);
+
+
+    function copyLink(link) {
+        navigator.clipboard.writeText(link).then(function() {
+            Toastify({
+                text: "Link copiado com sucesso!",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4CAF50",
+                stopOnFocus: true,
+            }).showToast();
+        }, function(err) {
+            Toastify({
+                text: "Erro ao copiar o link!",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                stopOnFocus: true,
+            }).showToast();
+        });
+    }
 </script>
 
 @code {
@@ -197,11 +262,8 @@
         if (news is null)
         {
             var result = await getNews.Handle();
-            if (result is not null)
-            {
-                news = result;
-                LoadSubjectDict();
-            }
+            news = result;
+            LoadSubjectDict();
         }
     }
 
@@ -216,46 +278,66 @@
         }
     }
 
-    private async Task SetSubject(SubjectEnum subject)
+    private async Task HandleSubjectChange(SubjectEnum? subject)
     {
         selectedSubject = subject;
-        await UpdateNews();
+        await FilterNews();
     }
 
-    private async Task SetSubjectAsNull()
+    private async Task HandleSearch(string searchText)
     {
-        selectedSubject = null;
-        await UpdateNews();
+        await FilterNews(searchText);
     }
 
-    private async Task UpdateNews()
+    private async Task FilterNews(string? searchText = null)
     {
         if (selectedSubject is not null)
         {
             news = news!.Where(n => n.Subject == selectedSubject);
+            return;
         }
-        else
+
+        if (! string.IsNullOrEmpty(searchText))
         {
-            var result = await getNews.Handle();
-            if (result is not null)
-            {
-                news = result;
-            }
+            news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            return;
         }
+
+        var result = await getNews.Handle();
+        news = result;
     }
 
-    
-    private Modal modal = default!;
-    private News newsItem = default!;
+
+    private Modal _modal = default!;
+    private News? _newsItem;
 
     private async Task OnShowModalClick(News news)
     {
-        newsItem = news;
-        await modal.ShowAsync();
+        _newsItem = news;
+        await _modal.ShowAsync();
     }
 
     private async Task OnHideModalClick()
     {
-        await modal.HideAsync();
+        await _modal.HideAsync();
     }
+
+    private string FormatContent(string content) => content.Replace("\n", "<br>");
+
+    private async Task ShareNews()
+    {
+        if (_newsItem is not null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("copyLink", _newsItem.OriginalUrl.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao compartilhar: {ex.Message}");
+            }
+        }
+    }
+
+
 }

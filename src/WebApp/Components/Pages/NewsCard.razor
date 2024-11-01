@@ -9,7 +9,8 @@
         <p class="card-text mb-2" style="font-weight: bolder; font-size: 1.2rem">@news.GetFormatedTitle()</p>
         <div class="d-flex justify-content-between align-items-center" style="margin-top: auto">
             <small class="text-muted">@news.PublishedAt.ToString("dd/MM/yyyy")</small>
-            <p class="@news.Subject subject-default">@news.GetSubjectInPtBr()</p>
+            @* <p class="@news.Subject subject-default">@news.GetSubjectInPtBr()</p> *@
+            <NewsSujectBadge news="@news" />
         </div>
     </div>
 
@@ -27,7 +28,7 @@
     .card {
         max-width: 100%;
         padding: 0 10px 10px 10px;
-        height: 100%;
+        height: 100%;        
     }
 
     .source-icon{
@@ -53,40 +54,6 @@
         text-decoration: none;
     }
 
-    .subject-default {
-        background-color: #4a4a4a54;
-        color: white;
-        padding: 1px 5px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        margin-bottom: 0;
-    }
-
-    .Politics {
-        background-color: #ccccff;
-        color: #000079;
-    }
-
-    .Health {
-        background-color: #ccffcc;
-        color: #005700
-    }
-
-    .Sports {
-        background-color: rgba(255, 0, 255, 0.2);
-        color: #ff00ff;
-    }
-
-    .Economy {
-        background-color: #ffffcc;
-        color: #ac8a05;
-    }
-
-    .Woman {
-        background-color: #ccccff;
-        color: #990303;
-    }
-
 
     .ler-noticia-btn {
         text-decoration: none;
@@ -96,36 +63,6 @@
         cursor: pointer;
     }
 </style>
-
-<script>
-    function copyLink(link) {
-        navigator.clipboard.writeText(link).then(function() {
-            Toastify({
-                text: "Link copiado com sucesso!",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#4CAF50",
-                stopOnFocus: true,
-            }).showToast();
-        }, function(err) {
-            Toastify({
-                text: "Erro ao copiar o link!",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                stopOnFocus: true,
-            }).showToast();
-        });
-    }
-
-    function openInNewTab(link) {
-        window.open(link, '_blank').focus();
-    }
-</script>
 
 @code {
     [Parameter] public News news { get; set; }
