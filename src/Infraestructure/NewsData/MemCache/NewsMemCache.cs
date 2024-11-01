@@ -6,11 +6,14 @@ namespace Infraestructure.NewsData.MemCache;
 
 public sealed class NewsMemCache : INewsRepository
 {
+    private const int CacheExpirationHours = 3;
+    
     // REFERENCIA: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-8.0#use-setsize-size-and-sizelimit-to-limit-cache-size
     private readonly MemoryCache _cache = new(
         new MemoryCacheOptions
         {
-            SizeLimit = 1024
+            SizeLimit = 1024,
+            ExpirationScanFrequency = TimeSpan.FromHours(CacheExpirationHours)
         }
     );
 
@@ -19,10 +22,9 @@ public sealed class NewsMemCache : INewsRepository
         await _cache.GetOrCreateAsync(
             news.Id, cacheEntry =>
             {
-                // Definir o tamanho da entrada do cache
                 cacheEntry.Size = CalculateApproximateSize(news);
-
-                // Rastrear a chave
+                cacheEntry.SlidingExpiration = TimeSpan.FromHours(CacheExpirationHours);
+                
                 _cache.TrackKey(news.Id);
 
                 return Task.FromResult(news);
