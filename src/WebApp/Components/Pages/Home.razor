@@ -308,12 +308,12 @@
         if (selectedSubject is not null)
         {
             news = news!.Where(n => n.Subject == selectedSubject);
-            return;
-        }
 
-        if (! string.IsNullOrEmpty(searchText))
-        {
-            news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            }
+
             return;
         }
 
