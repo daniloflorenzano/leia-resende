@@ -3,6 +3,7 @@ using Core.NewsSearchs;
 using Infraestructure;
 using Infraestructure.Azure;
 using Infraestructure.NewsData;
+using Infraestructure.NewsData.MemCache;
 using WebApp.Components;
 using Quartz;
 
