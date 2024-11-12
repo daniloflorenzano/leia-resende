@@ -13,22 +13,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// OPTIONS PATTERN //
 var azureCosmosDbConfig = new AzureCosmosDbConfig();
 builder.Configuration.GetSection("AzureCosmosDB").Bind(azureCosmosDbConfig);
 builder.Services.AddSingleton(azureCosmosDbConfig);
+//----------------//
 
-builder.Services.AddLogging(builder => builder.AddConsole());
-
+builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 builder.Services.AddScoped<NewsAzureCosmosDb>();
 builder.Services.AddSingleton<NewsMemCache>();
 builder.Services.AddScoped<INewsRepository, NewsRepositoryProxy>();
 builder.Services.AddScoped<INewsSearchRepository, NewsSearchAzureCosmosDb>();
-
 builder.Services.AddScoped<GetNews>();
 builder.Services.AddScoped<RegisterNews>();
+
+// OBSERVER PATTERN //
+#pragma warning disable ASP0000
 var registerNews = builder.Services.BuildServiceProvider().GetService<RegisterNews>();
+#pragma warning restore ASP0000
 var scrapNews = ScrapNews.GetInstance();
 scrapNews.Subscribe(registerNews!);
+//-----------------//
 
 builder.Services.AddScoped<RegisterNewsSearch>();
 

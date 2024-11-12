@@ -17,7 +17,7 @@
         </HeaderTemplate>
         <BodyTemplate>
             <div class="modal-body">
-                @if (_newsItem.ImageUrl is not null)
+                @if (_newsItem!.ImageUrl is not null)
                 {
                     <img src="@_newsItem.ImageUrl" class="img-fluid rounded mb-3" alt="@_newsItem.Title"/>
                 }

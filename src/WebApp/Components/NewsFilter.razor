@@ -1,4 +1,3 @@
-@using BlazorBootstrap
 @using Core.News
 
 <div class="filter-container mb-4">
@@ -14,10 +13,10 @@
                         type="text"
                         class="form-control border-start-0"
                         placeholder="Buscar notícias..."
-                        @bind-value="searchText"
+                        @bind-value="_searchText"
                         @bind-value:event="oninput"
                         @onkeyup="HandleSearch"/>
-                    @if (!string.IsNullOrEmpty(searchText))
+                    @if (!string.IsNullOrEmpty(_searchText))
                     {
                         <button class="btn btn-outline-secondary border-start-0" @onclick="ClearSearch">
                             <i class="bi bi-x-lg"></i>
@@ -30,9 +29,10 @@
         <!-- Dropdown de Categorias para Mobile -->
         <div class="col-md-6 d-block d-md-none">
             <Dropdown>
+                @* ReSharper disable once Razor.UnresolvedComponent *@
                 <DropdownToggle Color="ButtonColor.Light" Class="w-100">
                     <i class="bi bi-filter me-2"></i>
-                    @(SelectedSubject == null ? "Todas as Categorias" : SubjectDict[SelectedSubject.Value])
+                    @(SelectedSubject == null ? "Todas as Categorias" : SubjectDict![SelectedSubject.Value])
                 </DropdownToggle>
                 <DropdownMenu>
                     <DropdownItem @onclick="SetSubjectAsNull" Active="SelectedSubject == null">
@@ -78,15 +78,15 @@
     </div>
 
     <!-- Exibição de Filtros Ativos -->
-    @if (!string.IsNullOrEmpty(searchText) || SelectedSubject != null)
+    @if (!string.IsNullOrEmpty(_searchText) || SelectedSubject != null)
     {
         <div class="active-filters mt-3">
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 <small class="text-muted me-2">Filtros ativos:</small>
-                @if (!string.IsNullOrEmpty(searchText))
+                @if (!string.IsNullOrEmpty(_searchText))
                 {
                     <Badge Color="BadgeColor.Light" Class="d-flex align-items-center">
-                        <span class="me-2">@searchText</span>
+                        <span class="me-2">@_searchText</span>
                         <button class="btn-close btn-close-sm" @onclick="ClearSearch"></button>
                     </Badge>
                 }
@@ -104,8 +104,8 @@
 </div>
 
 @code {
-    private string searchText = string.Empty;
-    private Timer? searchTimer;
+    private string _searchText = string.Empty;
+    private Timer? _searchTimer;
 
     [Parameter] public SubjectEnum? SelectedSubject { get; set; }
 
@@ -130,26 +130,26 @@
     private void HandleSearch()
     {
         // Implementa debounce na pesquisa
-        searchTimer?.Dispose();
-        searchTimer = new Timer(async _ => { await InvokeAsync(async () => { await OnSearch.InvokeAsync(searchText); }); }, null, 300, Timeout.Infinite);
+        _searchTimer?.Dispose();
+        _searchTimer = new Timer(async _ => { await InvokeAsync(async () => { await OnSearch.InvokeAsync(_searchText); }); }, null, 300, Timeout.Infinite);
     }
 
     private async Task ClearSearch()
     {
-        searchText = string.Empty;
+        _searchText = string.Empty;
         await OnSearch.InvokeAsync(string.Empty);
     }
 
     private async Task ClearAllFilters()
     {
-        searchText = string.Empty;
+        _searchText = string.Empty;
         await OnSearch.InvokeAsync(string.Empty);
         await SelectedSubjectChanged.InvokeAsync(null);
     }
 
     public void Dispose()
     {
-        searchTimer?.Dispose();
+        _searchTimer?.Dispose();
     }
 
 }
