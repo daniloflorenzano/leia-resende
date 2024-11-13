@@ -6,5 +6,6 @@ public enum SubjectEnum
     Health = 2,
     Sports = 3,
     Economy = 4,
-    Woman = 5
+    Woman = 5,
+    Culture = 6,
 }

@@ -30,8 +30,8 @@ public sealed class News
     
     public News(string title, string content, string author, Uri authorIconUrl, SubjectEnum subject, DateTime publishedAt, Uri originalUrl, Uri? imageUrl)
     {
-        Title = title;
-        Content = content;
+        Title = title.Trim();
+        Content = content.Trim();
         Author = author;
         AuthorIconUrl = authorIconUrl;
         Subject = subject;
@@ -71,6 +71,7 @@ public sealed class News
             SubjectEnum.Economy => "Economia",
             SubjectEnum.Health => "Saúde",
             SubjectEnum.Woman => "Mulher",
+            SubjectEnum.Culture => "Cultura",
             _ => "Outros"
         };
     }

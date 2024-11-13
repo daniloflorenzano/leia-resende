@@ -2,7 +2,7 @@ using HtmlAgilityPack;
 
 namespace Core.News.DataSources;
 
-public class JornalBeiraRio(HttpClient httpclient)
+public class JornalBeiraRio(HttpClient httpclient) : IDataSource
 {
     private const string SourceName = "Jornal Beira Rio";
     private const string SourceIconUrl = "https://jornalbeirario.com.br/portal/wp-content/uploads/2017/09/beira_rio_icon-150x150.png";
@@ -25,7 +25,7 @@ public class JornalBeiraRio(HttpClient httpclient)
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollection = await CreateNewsObject(articles,SubjectEnum.Politics);
+        var newsCollection = CreateNewsObject(articles,SubjectEnum.Politics);
 
         return newsCollection;
     }
@@ -39,13 +39,13 @@ public class JornalBeiraRio(HttpClient httpclient)
         htmlDoc.LoadHtml(html); 
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-        var newsCollection = await CreateNewsObject(articles,SubjectEnum.Health);
+        var newsCollection = CreateNewsObject(articles,SubjectEnum.Health);
 
         return newsCollection;
 
     }
 
-    private Task<News[]> CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)
+    private News[] CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)
     {
         var newsCollection = new List<News>();
 
@@ -75,6 +75,6 @@ public class JornalBeiraRio(HttpClient httpclient)
             newsCollection.Add(news);
         }
 
-        return Task.FromResult(newsCollection.ToArray());
+        return newsCollection.ToArray();
     }
 }
