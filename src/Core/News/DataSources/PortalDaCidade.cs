@@ -11,25 +11,34 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
-        news.AddRange(await GetCultureNews());
+        news.AddRange(await GetNewsBySubject("cultura", SubjectEnum.Culture));
+        news.AddRange(await GetNewsBySubject("economia", SubjectEnum.Economy));
+        news.AddRange(await GetNewsBySubject("educacao", SubjectEnum.Education));
+        news.AddRange(await GetNewsBySubject("esportes", SubjectEnum.Sports));
+        news.AddRange(await GetNewsBySubject("politica", SubjectEnum.Politics));
+        news.AddRange(await GetNewsBySubject("saude", SubjectEnum.Health));
+        news.AddRange(await GetNewsBySubject("turismo", SubjectEnum.Tourism));
+        
+        // generico, podem vir noticias repetidas
+        news.AddRange(await GetNewsBySubject("cidade", SubjectEnum.Undefined));
         return news.ToArray();
     }
 
-    private async Task<News[]> GetCultureNews()
+    private async Task<News[]> GetNewsBySubject(string editoriaId, SubjectEnum subjectEnum)
     {
-        var response = await httpClient.GetAsync("https://resende.portaldacidade.com/noticias/cultura");
+        var response = await httpClient.GetAsync($"https://resende.portaldacidade.com/noticias/{editoriaId}");
         var html = await response.Content.ReadAsStringAsync();
-        
+
         var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html); 
+        htmlDoc.LoadHtml(html);
 
         var newsNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='news-flex']");
         var linkNodes = newsNode.SelectNodes(".//a");
 
-        var newsCollections = CreateNewsObject(linkNodes, SubjectEnum.Culture);
+        var newsCollections = CreateNewsObject(linkNodes, subjectEnum);
         return newsCollections;
     }
-
+    
     private News[] CreateNewsObject(HtmlNodeCollection linkNodes, SubjectEnum subject)
     {
         var newsCollection = new List<News>();
