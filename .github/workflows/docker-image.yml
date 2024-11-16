@@ -14,14 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Login to Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Login to Azure Container Registry
-      run: az acr login --name leiaresende
 
     - name: Navigate to src directory
       run: cd src/
@@ -32,8 +24,19 @@ jobs:
     - name: Navigate to src directory again
       run: cd src/
 
+    - name: Display src content again
+      run: ls
+
     - name: Build Docker Image
       run: docker build . --file Dockerfile --tag leiaresende.azurecr.io/prod/leia-resende:latest
+    
+    - name: Login to Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      run: az acr login --name leiaresende
 
     - name: Push Docker Image to ACR
       run: docker push leiaresende.azurecr.io/prod/leia-resende:latest     
