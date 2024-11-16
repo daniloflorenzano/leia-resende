@@ -72,6 +72,8 @@ public sealed class News
             SubjectEnum.Health => "Saúde",
             SubjectEnum.Woman => "Mulher",
             SubjectEnum.Culture => "Cultura",
+            SubjectEnum.Tourism => "Turismo",
+            SubjectEnum.Environment => "Meio Ambiente",
             _ => "Indefinido"
         };
     }

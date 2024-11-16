@@ -9,40 +9,28 @@ public class JornalBeiraRio(HttpClient httpclient) : IDataSource
     
     public async Task<News[]> GetNews(){
         var news = new List<News>();
-        news.AddRange(await GetPolitcsNews());
-        news.AddRange(await GetPolitcsHealth());
+        news.AddRange(await GetNewsBySubject("11", SubjectEnum.Politics));
+        news.AddRange(await GetNewsBySubject("18", SubjectEnum.Health));
+        news.AddRange(await GetNewsBySubject("6", SubjectEnum.Economy));
+        news.AddRange(await GetNewsBySubject("27", SubjectEnum.Environment));
+        news.AddRange(await GetNewsBySubject("16", SubjectEnum.Environment));
     
         return news.ToArray();
     }
 
-    private async Task<News[]> GetPolitcsNews()
+    private async Task<News[]> GetNewsBySubject(string catId, SubjectEnum subjectEnum)
     {
-        var response = await httpclient.GetAsync("https://jornalbeirario.com.br/portal/?cat=11");
+        var response = await httpclient.GetAsync($"https://jornalbeirario.com.br/portal/?cat={catId}");
         var html = await response.Content.ReadAsStringAsync();
         
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(html); 
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-
-        var newsCollection = CreateNewsObject(articles, SubjectEnum.Politics);
-
-        return newsCollection;
-    }
-    
-    private async Task<News[]> GetPolitcsHealth()
-    {
-        var response = await httpclient.GetAsync("https://jornalbeirario.com.br/portal/?cat=18");
-        var html = await response.Content.ReadAsStringAsync();
         
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html); 
-
-        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
         var newsCollection = CreateNewsObject(articles,SubjectEnum.Health);
 
         return newsCollection;
-
     }
 
     private News[] CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)

@@ -9,4 +9,6 @@ public enum SubjectEnum
     Economy = 4,
     Woman = 5,
     Culture = 6,
+    Environment = 7,
+    Tourism = 8,
 }
