@@ -16,15 +16,9 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Navigate to src directory
-      run: cd src/
+      run: cd src
 
     - name: Display src content
-      run: ls
-
-    - name: Navigate to src directory again
-      run: cd src/
-
-    - name: Display src content again
       run: ls
 
     - name: Build Docker Image
