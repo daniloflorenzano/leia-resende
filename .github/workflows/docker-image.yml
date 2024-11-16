@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Login to Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      run: az acr login --name leiaresende
+
+    - name: Build Docker Image
+      run: docker build . --file Dockerfile --tag leiaresende.azurecr.io/prod/leia-resende:latest
+
+    - name: Push Docker Image to ACR
+      run: docker push leiaresende.azurecr.io/prod/leia-resende:latest     
+
+    - name: Restart Azure Container Instance
+      run: az container restart --resource-group aedb --name leia-resende-container-app
