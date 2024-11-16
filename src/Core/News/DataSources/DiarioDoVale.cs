@@ -11,14 +11,18 @@ public class DiarioDoVale(HttpClient httpclient) : IDataSource
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
-        news.AddRange(await GetPoliticsNews());
-        news.AddRange(await GetSportsNews());
+        news.AddRange(await GetNewsBySubject("politica", SubjectEnum.Politics));
+        news.AddRange(await GetNewsBySubject("esporte", SubjectEnum.Sports));
+        news.AddRange(await GetNewsBySubject("economia", SubjectEnum.Economy));
+        
+        // generico, podem vir noticias repetidas
+        news.AddRange(await GetNewsBySubject("cidade", SubjectEnum.Undefined));
         return news.ToArray();
     }
 
-    private async Task<News[]> GetPoliticsNews()
+    private async Task<News[]> GetNewsBySubject(string editoriaId, SubjectEnum subjectEnum)
     {
-        var response = await httpclient.GetAsync("https://diariodovale.com.br/editoria/politica/");
+        var response = await httpclient.GetAsync($"https://diariodovale.com.br/editoria/{editoriaId}/");
         var html = await response.Content.ReadAsStringAsync();
 
         var htmlDoc = new HtmlDocument();
@@ -26,21 +30,7 @@ public class DiarioDoVale(HttpClient httpclient) : IDataSource
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollections = CreateNewsObject(articles, SubjectEnum.Politics);
-        return newsCollections;
-    }
-
-    private async Task<News[]> GetSportsNews()
-    {
-        var response = await httpclient.GetAsync("https://diariodovale.com.br/editoria/esporte/");
-        var html = await response.Content.ReadAsStringAsync();
-
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html);
-
-        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-
-        var newsCollections = CreateNewsObject(articles, SubjectEnum.Sports);
+        var newsCollections = CreateNewsObject(articles, subjectEnum);
         return newsCollections;
     }
 
