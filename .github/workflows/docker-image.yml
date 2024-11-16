@@ -14,15 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Navigate to src directory
-      run: cd src
-
+    
     - name: Display src content
-      run: ls
+      run: ls src
 
     - name: Build Docker Image
-      run: docker build . --file Dockerfile --tag leiaresende.azurecr.io/prod/leia-resende:latest
+      run: docker build . --file src/Dockerfile --tag leiaresende.azurecr.io/prod/leia-resende:latest
     
     - name: Login to Azure CLI
       uses: azure/login@v1
