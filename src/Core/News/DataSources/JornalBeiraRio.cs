@@ -20,17 +20,25 @@ public class JornalBeiraRio(HttpClient httpclient) : IDataSource
 
     private async Task<News[]> GetNewsBySubject(string catId, SubjectEnum subjectEnum)
     {
-        var response = await httpclient.GetAsync($"https://jornalbeirario.com.br/portal/?cat={catId}");
-        var html = await response.Content.ReadAsStringAsync();
-        
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html); 
+        try
+        {
+            var response = await httpclient.GetAsync($"https://jornalbeirario.com.br/portal/?cat={catId}");
+            var html = await response.Content.ReadAsStringAsync();
 
-        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-        
-        var newsCollection = CreateNewsObject(articles,SubjectEnum.Health);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
 
-        return newsCollection;
+            var articles = htmlDoc.DocumentNode.SelectNodes("//article");
+
+            var newsCollection = CreateNewsObject(articles, SubjectEnum.Health);
+
+            return newsCollection;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao capturar notícias do site Jornal Beira Rio para o assunto {catId}: {e.Message}");
+            return [];
+        }
     }
 
     private News[] CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)

@@ -1,21 +1,22 @@
 using Core.NewsSearchs;
+using Infraestructure.Azure;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 
-namespace Infraestructure.Azure;
+namespace Infraestructure.NewsData;
 
 public class NewsSearchAzureCosmosDb : INewsSearchRepository
 {
-    private readonly Container container;
-    private readonly ILogger<NewsSearchAzureCosmosDb> logger;
+    private readonly Container _container;
+    private readonly ILogger<NewsSearchAzureCosmosDb> _logger;
 
     public NewsSearchAzureCosmosDb(AzureCosmosDbConfig azureCosmosDbConfig, ILogger<NewsSearchAzureCosmosDb> logger)
     {
         var cosmosClient = new CosmosClient(azureCosmosDbConfig.Endpoint, azureCosmosDbConfig.SecretKey);
         var database = cosmosClient.GetDatabase(azureCosmosDbConfig.DatabaseName);
-        container = database.GetContainer("NewsSearch");
+        _container = database.GetContainer("NewsSearch");
 
-        this.logger = logger;
+        this._logger = logger;
     }
 
     public async Task Create(NewsSearch newsSearch)
@@ -23,12 +24,12 @@ public class NewsSearchAzureCosmosDb : INewsSearchRepository
         try
         {
             var payload = new NewsSearchPayload(newsSearch.Id.ToString(), newsSearch.CreatedAt);
-            var newsSearchResponse = await container.CreateItemAsync(payload);
-            logger.LogInformation("Busca de notícia adicionada com sucesso, id: {1}", newsSearchResponse.Resource.id);
+            var newsSearchResponse = await _container.CreateItemAsync(payload);
+            _logger.LogInformation("Busca de notícia adicionada com sucesso, id: {1}", newsSearchResponse.Resource.id);
         }
         catch (Exception ex)
         {
-            logger.LogError("Erro ao adicionar notícia: {0}", ex.Message);
+            _logger.LogError("Erro ao adicionar notícia: {message}", ex.Message);
         }        
     }
 }

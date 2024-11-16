@@ -24,16 +24,24 @@ public class AVozDaCidade(HttpClient httpclient) : IDataSource
 
     private async Task<News[]> GetNewsBySubject(string editoriaId, SubjectEnum subjectEnum)
     {
-        var response = await httpclient.GetAsync($"https://avozdacidade.com/wp/editorias/{editoriaId}/");
-        var html = await response.Content.ReadAsStringAsync();
+        try
+        {
+            var response = await httpclient.GetAsync($"https://avozdacidade.com/wp/editorias/{editoriaId}/");
+            var html = await response.Content.ReadAsStringAsync();
 
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
 
-        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
+            var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollections = CreateNewsObject(articles, subjectEnum);
-        return newsCollections;
+            var newsCollections = CreateNewsObject(articles, subjectEnum);
+            return newsCollections;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao capturar notícias do site A Voz da Cidade para o assunto {editoriaId}: {e.Message}");
+            return [];
+        }
     }
 
     private News[] CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)

@@ -26,17 +26,25 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
 
     private async Task<News[]> GetNewsBySubject(string editoriaId, SubjectEnum subjectEnum)
     {
-        var response = await httpClient.GetAsync($"https://resende.portaldacidade.com/noticias/{editoriaId}");
-        var html = await response.Content.ReadAsStringAsync();
+        try
+        {
+            var response = await httpClient.GetAsync($"https://resende.portaldacidade.com/noticias/{editoriaId}");
+            var html = await response.Content.ReadAsStringAsync();
 
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
 
-        var newsNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='news-flex']");
-        var linkNodes = newsNode.SelectNodes(".//a");
+            var newsNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='news-flex']");
+            var linkNodes = newsNode.SelectNodes(".//a");
 
-        var newsCollections = CreateNewsObject(linkNodes, subjectEnum);
-        return newsCollections;
+            var newsCollections = CreateNewsObject(linkNodes, subjectEnum);
+            return newsCollections;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao capturar notícias do site Portal da Cidade para o assunto {editoriaId}: {e.Message}");
+            return [];
+        }
     }
     
     private News[] CreateNewsObject(HtmlNodeCollection linkNodes, SubjectEnum subject)

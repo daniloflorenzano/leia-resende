@@ -13,37 +13,49 @@ public class PrefeituraResende(HttpClient httpClient) : IDataSource
 
     private async Task<News[]> GetNewsOfCurrentDay()
     {
-        var dateFilter = DateTime.Now.ToString("dd/MM/yyyy");
-        var dateFilterEncoded = HttpUtility.UrlEncode(dateFilter);
-        
-        var response = await httpClient.GetAsync($"https://resende.rj.gov.br/noticias?de={dateFilterEncoded}&page=1");
-        var html = await response.Content.ReadAsStringAsync();
-        
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html); 
-
-        var pagination = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='pagination']");
-        var lastPage = pagination.SelectSingleNode(".//a[last()-1]").InnerText;
-        
-        if (!int.TryParse(lastPage, out var totalPages)) 
-            return [];
-        
-        var news = new List<News>();
-        for (var i = 1; i <= totalPages; i++)
+        try
         {
-            if (i > 1)
+            var dateFilter = DateTime.Now.ToString("dd/MM/yyyy");
+            var dateFilterEncoded = HttpUtility.UrlEncode(dateFilter);
+
+            var response =
+                await httpClient.GetAsync($"https://resende.rj.gov.br/noticias?de={dateFilterEncoded}&page=1");
+            var html = await response.Content.ReadAsStringAsync();
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+
+            var pagination = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='pagination']");
+            var lastPage = pagination.SelectSingleNode(".//a[last()-1]").InnerText;
+
+            if (!int.TryParse(lastPage, out var totalPages))
+                return [];
+
+            var news = new List<News>();
+            for (var i = 1; i <= totalPages; i++)
             {
-                var responsePage = await httpClient.GetAsync($"https://resende.rj.gov.br/noticias?de={dateFilterEncoded}&page={i}");
-                html = await responsePage.Content.ReadAsStringAsync();
+                if (i > 1)
+                {
+                    var responsePage =
+                        await httpClient.GetAsync(
+                            $"https://resende.rj.gov.br/noticias?de={dateFilterEncoded}&page={i}");
+                    html = await responsePage.Content.ReadAsStringAsync();
+                }
+
+                var htmlDocPage = new HtmlDocument();
+                htmlDocPage.LoadHtml(html);
+                var newsNodes = htmlDocPage.DocumentNode.SelectNodes("//a[@class='item']");
+                var newsCollections = CreateNewsObject(newsNodes);
+                news.AddRange(newsCollections);
             }
-            
-            var htmlDocPage = new HtmlDocument();
-            htmlDocPage.LoadHtml(html); 
-            var newsNodes = htmlDocPage.DocumentNode.SelectNodes("//a[@class='item']");
-            var newsCollections = CreateNewsObject(newsNodes);
-            news.AddRange(newsCollections);
+
+            return news.ToArray();
         }
-        return news.ToArray();
+        catch (Exception e)
+        {
+            Console.WriteLine($"Erro ao capturar notícias do site Prefeitura de Resende: {e.Message}");
+            return [];
+        }
 
     }
 

@@ -10,10 +10,7 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
 {
     public async Task Create(News news)
     {
-        logger.LogInformation("Salvando notícia no cache {Title}", news.Title);
         await WriteNewsToCache(news);
-
-        logger.LogInformation("Salvando notícia no banco de dados {Title}", news.Title);
         await WriteNewsToDb(news);
     }
 
@@ -28,11 +25,8 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
         logger.LogInformation("Buscando notícias no banco de dados");
         var news = await GetNewsFromDb(where);
         var newsItems = news as News[] ?? news.ToArray();
-        foreach (var newsItem in newsItems)
-        {
-            logger.LogInformation("Salvando notícia no cache {Title}", newsItem.Title);
+        foreach (var newsItem in newsItems) 
             await WriteNewsToCache(newsItem);
-        }
         
         return newsItems;
     }

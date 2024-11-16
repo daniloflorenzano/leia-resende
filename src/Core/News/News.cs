@@ -66,14 +66,15 @@ public sealed class News
     {
         return Subject switch
         {
-            SubjectEnum.Sports => "Esportes",
             SubjectEnum.Politics => "Política",
-            SubjectEnum.Economy => "Economia",
             SubjectEnum.Health => "Saúde",
+            SubjectEnum.Sports => "Esportes",
+            SubjectEnum.Economy => "Economia",
             SubjectEnum.Woman => "Mulher",
             SubjectEnum.Culture => "Cultura",
-            SubjectEnum.Tourism => "Turismo",
             SubjectEnum.Environment => "Meio Ambiente",
+            SubjectEnum.Tourism => "Turismo",
+            SubjectEnum.Education => "Educação",
             _ => "Indefinido"
         };
     }
