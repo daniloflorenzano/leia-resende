@@ -56,6 +56,7 @@ public sealed class ScrapNews : IObservable<News>
     public async Task Handle()
     {
         var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0");
 
         try {
             // usa reflection para pegar todas as classes que herdam de IDataSource
@@ -64,14 +65,18 @@ public sealed class ScrapNews : IObservable<News>
                 .Where(t => t.GetInterfaces().Contains(typeof(IDataSource)))
                 .ToList();
 
-            foreach (var type in types)
-            {
+            // Configurando o máximo de paralelismo
+            var options = new ParallelOptions { 
+                MaxDegreeOfParallelism = Environment.ProcessorCount 
+            };
+            
+            await Parallel.ForEachAsync(types, options, async (type, _) => {
                 var instance = Activator.CreateInstance(type, httpClient);
                 var method = type.GetMethod("GetNews");
                 var news = await ((Task<News[]>) method!.Invoke(instance, null)!)!;
                 foreach (var n in news)
                     NotifySubs(n);
-            }
+            });
         }
         catch (Exception)
         {
