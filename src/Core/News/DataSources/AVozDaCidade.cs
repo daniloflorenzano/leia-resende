@@ -10,14 +10,21 @@ public class AVozDaCidade(HttpClient httpclient) : IDataSource
     public async Task<News[]> GetNews()
     {
         var news = new List<News>();
-        news.AddRange(await GetEconomyNews());
-        news.AddRange(await GetWomanNews());
+        news.AddRange(await GetNewsBySubject("politica", SubjectEnum.Politics));
+        news.AddRange(await GetNewsBySubject("esporte", SubjectEnum.Sports));
+        news.AddRange(await GetNewsBySubject("economia", SubjectEnum.Economy));
+        news.AddRange(await GetNewsBySubject("mulher", SubjectEnum.Woman));
+        news.AddRange(await GetNewsBySubject("cultura", SubjectEnum.Culture));
+        news.AddRange(await GetNewsBySubject("educacao", SubjectEnum.Education));
+        
+        // generico, podem vir noticias repetidas
+        news.AddRange(await GetNewsBySubject("cidades", SubjectEnum.Undefined));
         return news.ToArray();
     }
 
-    private async Task<News[]> GetEconomyNews()
+    private async Task<News[]> GetNewsBySubject(string editoriaId, SubjectEnum subjectEnum)
     {
-        var response = await httpclient.GetAsync("https://avozdacidade.com/wp/editorias/economia/");
+        var response = await httpclient.GetAsync($"https://avozdacidade.com/wp/editorias/{editoriaId}/");
         var html = await response.Content.ReadAsStringAsync();
 
         var htmlDoc = new HtmlDocument();
@@ -25,25 +32,11 @@ public class AVozDaCidade(HttpClient httpclient) : IDataSource
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollections = await CreateNewsObject(articles, SubjectEnum.Economy);
+        var newsCollections = CreateNewsObject(articles, subjectEnum);
         return newsCollections;
     }
 
-    private async Task<News[]> GetWomanNews()
-    {
-        var response = await httpclient.GetAsync("https://avozdacidade.com/wp/editorias/mulher/");
-        var html = await response.Content.ReadAsStringAsync();
-
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(html);
-
-        var articles = htmlDoc.DocumentNode.SelectNodes("//article");
-
-        var newsCollections = await CreateNewsObject(articles, SubjectEnum.Woman);
-        return newsCollections;
-    }
-
-    private Task<News[]> CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)
+    private News[] CreateNewsObject(HtmlNodeCollection articles, SubjectEnum subject)
     {
         var newsCollection = new List<News>();
 
@@ -83,6 +76,6 @@ public class AVozDaCidade(HttpClient httpclient) : IDataSource
                 newsCollection.Add(news);
         }
 
-        return Task.FromResult(newsCollection.ToArray());
+        return newsCollection.ToArray();
     }
 }

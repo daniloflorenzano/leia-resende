@@ -11,4 +11,5 @@ public enum SubjectEnum
     Culture = 6,
     Environment = 7,
     Tourism = 8,
+    Education = 9,
 }
