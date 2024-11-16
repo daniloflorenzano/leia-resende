@@ -24,6 +24,9 @@ jobs:
       run: az acr login --name leiaresende
 
     - name: Navigate to src directory
+      run: cd src/
+
+    - name: Display src content
       run: ls
 
     - name: Build Docker Image
