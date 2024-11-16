@@ -29,6 +29,9 @@ jobs:
     - name: Display src content
       run: ls
 
+      - name: Navigate to src directory again
+      run: cd src/
+
     - name: Build Docker Image
       run: docker build . --file Dockerfile --tag leiaresende.azurecr.io/prod/leia-resende:latest
 
