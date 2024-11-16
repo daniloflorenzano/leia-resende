@@ -1,3 +1,4 @@
+using System.Reflection;
 using Core.News.DataSources;
 
 namespace Core.News;
@@ -55,27 +56,26 @@ public sealed class ScrapNews : IObservable<News>
     public async Task Handle()
     {
         var httpClient = new HttpClient();
-        var diarioDoVale = new DiarioDoVale(httpClient);
-        var jornalBeiraRio = new JornalBeiraRio(httpClient);
-        var aVozDaCidade = new AVozDaCidade(httpClient);
 
         try {
-            var news = await diarioDoVale.GetNews();
-            foreach (var n in news)
-                NotifySubs(n);
-            
-            news = await jornalBeiraRio.GetNews();
-            foreach (var n in news)
-                NotifySubs(n);
-            
-            news = await aVozDaCidade.GetNews();
-            foreach (var n in news)
-                NotifySubs(n);
+            // usa reflection para pegar todas as classes que herdam de IDataSource
+            // e chama o método GetNews
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.GetInterfaces().Contains(typeof(IDataSource)))
+                .ToList();
+
+            foreach (var type in types)
+            {
+                var instance = Activator.CreateInstance(type, httpClient);
+                var method = type.GetMethod("GetNews");
+                var news = await ((Task<News[]>) method!.Invoke(instance, null)!)!;
+                foreach (var n in news)
+                    NotifySubs(n);
+            }
         }
         catch (Exception)
         {
             // nao faz nada
-            return;
         }
     }    
 }

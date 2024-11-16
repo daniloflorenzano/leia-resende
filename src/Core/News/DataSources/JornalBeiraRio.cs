@@ -25,7 +25,7 @@ public class JornalBeiraRio(HttpClient httpclient) : IDataSource
 
         var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-        var newsCollection = CreateNewsObject(articles,SubjectEnum.Politics);
+        var newsCollection = CreateNewsObject(articles, SubjectEnum.Politics);
 
         return newsCollection;
     }

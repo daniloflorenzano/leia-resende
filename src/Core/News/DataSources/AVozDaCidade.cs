@@ -2,7 +2,7 @@
 
 namespace Core.News.DataSources;
 
-public class AVozDaCidade(HttpClient httpclient)
+public class AVozDaCidade(HttpClient httpclient) : IDataSource
 {
     private const string SourceName = "A Voz da Cidade";
     private const string SourceIconUrl = "https://avozdacidade.com/wp/wp-content/uploads/2022/08/LOGO-A-VOZ-DA-CIDADE.jpg";

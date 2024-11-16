@@ -72,7 +72,7 @@ public sealed class News
             SubjectEnum.Health => "Saúde",
             SubjectEnum.Woman => "Mulher",
             SubjectEnum.Culture => "Cultura",
-            _ => "Outros"
+            _ => "Indefinido"
         };
     }
 
