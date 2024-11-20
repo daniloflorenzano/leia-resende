@@ -46,8 +46,8 @@ builder.Services.AddQuartz(q =>
         .ForJob(scrapNewsJobKey)
         .WithIdentity("ScrapNewsJob-trigger")
         .StartNow()
-        //.WithCronSchedule("0 0 */3 ? * *")); // a cada 3 horas
-        .WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
+        .WithCronSchedule("0 0 */3 ? * *")); // a cada 3 horas
+        //.WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
