@@ -17,7 +17,7 @@ public sealed class NewsMemCache : INewsRepository
         }
     );
 
-    public async Task Create(News news)
+    public async Task Write(News news)
     {
         await _cache.GetOrCreateAsync(
             news.Id, cacheEntry =>
@@ -30,6 +30,11 @@ public sealed class NewsMemCache : INewsRepository
                 return Task.FromResult(news);
             }
         );
+    }
+
+    public async Task Write(List<News> news)
+    {
+        foreach (var newsItem in news) await Write(newsItem);
     }
 
     private static int CalculateApproximateSize(News news)
@@ -45,16 +50,16 @@ public sealed class NewsMemCache : INewsRepository
         return Math.Max(1, size); // Garantir que o tamanho seja pelo menos 1
     }
 
-    public Task<IEnumerable<News>> Read(Expression<Func<News, bool>>? where = null)
+    public Task<List<News>> Read(Expression<Func<News, bool>>? where = null)
     {
-        var cacheEntries = _cache.GetKeys<News>();
+        var cacheEntries = _cache.GetKeys<News>().ToList();
         
         if (where == null)
         {
             return Task.FromResult(cacheEntries);
         }
         
-        var filteredEntries = cacheEntries.Where(where.Compile());
+        var filteredEntries = cacheEntries.Where(where.Compile()).ToList();
 
         return Task.FromResult(filteredEntries);
     }

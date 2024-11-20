@@ -2,18 +2,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.News;
 
-public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository newsRepository) : IObserver<News>
+public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository newsRepository) : IObserver<List<News>>
 {
-
-    public async Task Handle(News news){
-        ValidateNews(news);
-        await newsRepository.Create(news);
+    private async Task Handle(List<News> news){
+        news = RemoveDuplicatedNews(news);   
+        await newsRepository.Write(news);
     }
-
-    private void ValidateNews(News news){
-        //TODO: definir validacoes
+    
+    private List<News> RemoveDuplicatedNews(List<News> news){
+        return news.GroupBy(n => new {n.Title, n.PublishedAt}).Select(g => g.First()).ToList();
     }
-
+    
     public void OnCompleted()
     {
         throw new NotImplementedException();
@@ -24,8 +23,8 @@ public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository n
         throw new NotImplementedException();
     }
 
-    public async void OnNext(News value)
+    public void OnNext(List<News> value)
     {
-        await Handle(value);
+        Handle(value).Wait();
     }
 }

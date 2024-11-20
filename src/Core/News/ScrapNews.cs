@@ -3,43 +3,46 @@ using Core.News.DataSources;
 
 namespace Core.News;
 
-public sealed class ScrapNews : IObservable<News>
+public sealed class ScrapNews : IObservable<List<News>>
 {
     #region Singleton Pattern
+
     private static ScrapNews? _instance;
 
     public static ScrapNews GetInstance() => _instance ??= new ScrapNews();
 
     private ScrapNews()
     {
-        observers = new List<IObserver<News>>();
+        _observers = [];
     }
+
     #endregion
 
     #region Observer Pattern
-    private List<IObserver<News>> observers;
 
-    private void NotifySubs(News news)
+    private readonly List<IObserver<List<News>>> _observers;
+
+    private void NotifySubs(List<News> news)
     {
-        foreach (var observer in observers)
+        foreach (var observer in _observers)
             observer.OnNext(news);
     }
 
-    public IDisposable Subscribe(IObserver<News> observer)
+    public IDisposable Subscribe(IObserver<List<News>> observer)
     {
-        if (! observers.Contains(observer))
-            observers.Add(observer);
+        if (!_observers.Contains(observer))
+            _observers.Add(observer);
 
-        return new Unsubscriber(observers, observer);
+        return new Unsubscriber(_observers, observer);
     }
 
 
     private class Unsubscriber : IDisposable
     {
-        private List<IObserver<News>> _observers;
-        private IObserver<News> _observer;
+        private List<IObserver<List<News>>> _observers;
+        private IObserver<List<News>> _observer;
 
-        public Unsubscriber(List<IObserver<News>> observers, IObserver<News> observer)
+        public Unsubscriber(List<IObserver<List<News>>> observers, IObserver<List<News>> observer)
         {
             _observers = observers;
             _observer = observer;
@@ -47,18 +50,23 @@ public sealed class ScrapNews : IObservable<News>
 
         public void Dispose()
         {
-            if (!(_observer == null)) 
+            // ReSharper disable once NegativeEqualityExpression
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (!(_observer == null))
                 _observers.Remove(_observer);
         }
     }
+
     #endregion
 
     public async Task Handle()
     {
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0");
+        using (var httpClient = new HttpClient())
+        {
+            httpClient.DefaultRequestHeaders.Add("User-Agent",
+                "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0");
 
-        try {
+
             // usa reflection para pegar todas as classes que herdam de IDataSource
             // e chama o método GetNews
             var types = Assembly.GetExecutingAssembly().GetTypes()
@@ -66,23 +74,22 @@ public sealed class ScrapNews : IObservable<News>
                 .ToList();
 
             // Configurando o máximo de paralelismo
-            var options = new ParallelOptions { 
-                MaxDegreeOfParallelism = Environment.ProcessorCount 
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount
             };
-            
-            await Parallel.ForEachAsync(types, options, async (type, _) => {
+
+            var newsList = new List<News>();
+
+            await Parallel.ForEachAsync(types, options, async (type, _) =>
+            {
                 var instance = Activator.CreateInstance(type, httpClient);
                 var method = type.GetMethod("GetNews");
-                var news = await ((Task<News[]>) method!.Invoke(instance, null)!)!;
-                foreach (var n in news)
-                    NotifySubs(n);
+                var news = await (Task<News[]>)method!.Invoke(instance, null)!;
+                newsList.AddRange(news);
             });
+
+            NotifySubs(newsList);
         }
-        catch (Exception)
-        {
-            // nao faz nada
-        }
-    }    
+    }
 }
-
-

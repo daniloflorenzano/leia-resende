@@ -4,6 +4,6 @@ namespace Core.News;
 
 public interface INewsRepository
 {
-    Task Create(News news);
-    Task<IEnumerable<News>> Read(Expression<Func<News, bool>>? where = null);
+    Task Write(List<News> news);
+    Task<List<News>> Read(Expression<Func<News, bool>>? where = null);
 }

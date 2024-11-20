@@ -1,9 +1,10 @@
 using Core.News;
 using Core.NewsSearchs;
 using Infraestructure;
-using Infraestructure.Azure;
+using Infraestructure.EfCore;
 using Infraestructure.NewsData;
 using Infraestructure.NewsData.MemCache;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Components;
 using Quartz;
 
@@ -13,17 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// OPTIONS PATTERN //
-var azureCosmosDbConfig = new AzureCosmosDbConfig();
-builder.Configuration.GetSection("AzureCosmosDB").Bind(azureCosmosDbConfig);
-builder.Services.AddSingleton(azureCosmosDbConfig);
-//----------------//
+var connectionString = builder.Configuration.GetConnectionString("database");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
-builder.Services.AddScoped<NewsAzureCosmosDb>();
+builder.Services.AddScoped<NewsAzureSqlDatabase>();
 builder.Services.AddSingleton<NewsMemCache>();
 builder.Services.AddScoped<INewsRepository, NewsRepositoryProxy>();
-builder.Services.AddScoped<INewsSearchRepository, NewsSearchAzureCosmosDb>();
+builder.Services.AddScoped<INewsSearchRepository, NewsSearchAzureSqlDatabase>();
 builder.Services.AddScoped<GetNews>();
 builder.Services.AddScoped<RegisterNews>();
 
@@ -48,8 +46,8 @@ builder.Services.AddQuartz(q =>
         .ForJob(scrapNewsJobKey)
         .WithIdentity("ScrapNewsJob-trigger")
         .StartNow()
-        .WithCronSchedule("0 0 */3 ? * *")); // a cada 3 horas
-        //.WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
+        //.WithCronSchedule("0 0 */3 ? * *")); // a cada 3 horas
+        .WithCronSchedule("0 0/1 * 1/1 * ? *")); // a cada 1 minuto
 });
 
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
