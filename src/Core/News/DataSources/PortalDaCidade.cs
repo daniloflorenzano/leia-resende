@@ -64,6 +64,9 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
             date = HtmlEntity.DeEntitize(date);
             
             date = date.ReturnStringBetween("Publicado em ", " às");
+            var dia = date.ReturnStringBetween("", "/");
+            var mes = date.ReturnStringBetween("/", "/");
+            var ano = date.ReturnStringBetween("/", "");
             
             var news = new News(
                 title,
@@ -71,7 +74,7 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
                 SourceName,
                 new Uri(SourceIconUrl),
                 subject,
-                DateTime.Parse(date),
+                new DateTime(int.Parse(ano), int.Parse(mes), int.Parse(dia)),
                 new Uri(link),
                 new Uri(image));
             newsCollection.Add(news);
