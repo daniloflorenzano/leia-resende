@@ -5,7 +5,7 @@ namespace Core.News;
 
 public sealed class News
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid(); 
 
     public string Title { get; set; } = string.Empty;
 
@@ -21,7 +21,7 @@ public sealed class News
 
     public Uri OriginalUrl { get; set; } = null!;
 
-    public Uri? ImageUrl { get; set; } = null!;
+    public Uri? ImageUrl { get; set; }
 
     [Obsolete("Construtor para serialização", true)]
     public News()
@@ -37,18 +37,7 @@ public sealed class News
         Subject = subject;
         PublishedAt = publishedAt;
         OriginalUrl = originalUrl;
-        ImageUrl = imageUrl;
-        
-        Id = GenerateId();  
-    }
-
-    private string GenerateId()
-    {
-        var hash = new HashCode();
-        hash.Add(Title);
-        hash.Add(PublishedAt);
-        hash.Add(OriginalUrl);
-        return hash.ToHashCode().ToString();
+        ImageUrl = imageUrl;  
     }
 
     public override string ToString()

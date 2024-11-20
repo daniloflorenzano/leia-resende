@@ -30,13 +30,13 @@ public class JornalBeiraRio(HttpClient httpclient) : IDataSource
 
             var articles = htmlDoc.DocumentNode.SelectNodes("//article");
 
-            var newsCollection = CreateNewsObject(articles, SubjectEnum.Health);
+            var newsCollection = CreateNewsObject(articles, subjectEnum);
 
             return newsCollection;
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Erro ao capturar notícias do site Jornal Beira Rio para o assunto {catId}: {e.Message}");
+            Console.WriteLine($"Erro ao capturar notícias do site Jornal Beira Rio para o assunto {subjectEnum}: {e.Message}");
             return [];
         }
     }

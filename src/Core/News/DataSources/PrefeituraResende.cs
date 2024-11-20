@@ -22,10 +22,19 @@ public class PrefeituraResende(HttpClient httpClient) : IDataSource
                 await httpClient.GetAsync($"https://resende.rj.gov.br/noticias?de={dateFilterEncoded}&page=1");
             var html = await response.Content.ReadAsStringAsync();
 
+            if (html.Contains("Nenhuma notícia encontrada."))
+                return [];
+            
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
 
             var pagination = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='pagination']");
+            if (pagination is null)
+            {
+                var newsNodes = htmlDoc.DocumentNode.SelectNodes("//a[@class='item']");
+                return CreateNewsObject(newsNodes);
+            }
+            
             var lastPage = pagination.SelectSingleNode(".//a[last()-1]").InnerText;
 
             if (!int.TryParse(lastPage, out var totalPages))
