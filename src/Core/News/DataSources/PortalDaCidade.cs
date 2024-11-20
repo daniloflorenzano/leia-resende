@@ -55,8 +55,8 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
         {
             var title = article.SelectSingleNode(".//h2").InnerText;
             var link = article.GetAttributeValue("href", "");
-            var date = article.SelectSingleNode("//div[2]/p[3]").InnerText;
-            var content = article.SelectSingleNode("//div[2]/p[2]").InnerText;
+            var date = article.SelectSingleNode(".//div[2]/p[3]").InnerText;
+            var content = article.SelectSingleNode(".//div[2]/p[2]").InnerText;
             var image = article.SelectSingleNode(".//img").GetAttributeValue("src", "");
             
             title = HtmlEntity.DeEntitize(title);
@@ -66,7 +66,8 @@ public class PortalDaCidade(HttpClient httpClient) : IDataSource
             date = date.ReturnStringBetween("Publicado em ", " às");
             var dia = date.ReturnStringBetween("", "/");
             var mes = date.ReturnStringBetween("/", "/");
-            var ano = date.ReturnStringBetween("/", "");
+            // ano eh tudo menos dia e mes
+            var ano = date.Replace($"{dia}/", "").Replace($"{mes}/", "");
             
             var news = new News(
                 title,
