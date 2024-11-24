@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+using Core.Application;
 using Core.News;
 using Infraestructure.NewsData.MemCache;
 using Microsoft.Extensions.Logging;
@@ -13,29 +13,31 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
         await memCacheRepository.Write(news);
     }
 
-    public async Task<List<News>> Read(Expression<Func<News, bool>>? where = null)
+    public async Task<List<News>> Read(SearchFilter? filter = null)
     {
         logger.LogInformation("Buscando notícias no cache");
-        var newsFromCache = await GetNewsFromCache(where);
+        var newsFromCache = await GetNewsFromCache(filter);
         var newsEnumerable = newsFromCache.ToList();
         if (newsEnumerable.Count != 0)
             return newsEnumerable.ToList();
 
         logger.LogInformation("Buscando notícias no banco de dados");
-        var news = await GetNewsFromDb(where);
-        foreach (var newsItem in news) 
-            await memCacheRepository.Write(news);
+        var news = await GetNewsFromDb(filter);
+        
+        await memCacheRepository.Write(news, filter);
         
         return news;
     }
 
-    private async Task<IEnumerable<News>> GetNewsFromCache(Expression<Func<News, bool>>? where = null)
+    public async Task<int> Count() => await dbRepository.Count();
+
+    private async Task<IEnumerable<News>> GetNewsFromCache(SearchFilter? filter = null)
     {
-        return await memCacheRepository.Read(where);
+        return await memCacheRepository.Read(filter);
     }
 
-    private async Task<List<News>> GetNewsFromDb(Expression<Func<News, bool>>? where = null)
+    private async Task<List<News>> GetNewsFromDb(SearchFilter? filter = null)
     {
-        return await dbRepository.Read(where);
+        return await dbRepository.Read(filter);
     }
 }

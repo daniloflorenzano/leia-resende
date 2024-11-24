@@ -1,3 +1,4 @@
+using Core.Application;
 using Microsoft.Extensions.Logging;
 
 namespace Core.News;
@@ -15,7 +16,8 @@ public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository n
     
     public void OnCompleted()
     {
-        throw new NotImplementedException();
+        var globalInfo = GlobalInfo.GetInstance();
+        globalInfo.TotalNews = newsRepository.Count().Result;
     }
 
     public void OnError(Exception error)

@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+using Core.Application;
 using Core.News;
 using EFCore.BulkExtensions;
 using Infraestructure.EfCore;
@@ -35,19 +35,45 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
         }
     }
 
-    public async Task<List<News>> Read(Expression<Func<News, bool>>? where = null)
+    public async Task<List<News>> Read(SearchFilter? filter = null)
     {
         try
         {
-            return await dbContext.News
-                .Where(where ?? (news => true))
-                .AsNoTracking()
-                .ToListAsync();
+            var query = dbContext.News.AsQueryable();
+
+            if (filter is null) 
+                return await query.ToListAsync();
+            
+            if (filter.Where is not null) 
+                query = query.Where(filter.Where);
+            
+            if (filter.OrderBy is not null)
+                query = filter.OrderByDescending 
+                    ? query.OrderByDescending(filter.OrderBy) 
+                    : query.OrderBy(filter.OrderBy);
+
+            if (filter is { PaginationStart: >= 0, PaginationTake: > 0 }) 
+                query = query.Skip(filter.PaginationStart).Take(filter.PaginationTake);
+
+            return await query.ToListAsync();
         }
         catch (Exception e)
         {
             logger.LogError(e, "Erro ao ler notícias: {message}", e.Message);
             throw;
         }
+    }
+
+    public async Task<int> Count()
+    {
+        try
+        {
+            return await dbContext.News.CountAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Erro ao contar notícias: {message}", e.Message);
+            throw;
+        }        
     }
 }

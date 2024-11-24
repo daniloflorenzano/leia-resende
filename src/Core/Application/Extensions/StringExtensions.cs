@@ -1,4 +1,4 @@
-namespace Core.Extensions;
+namespace Core.Application.Extensions;
 
 public static class StringExtensions
 {

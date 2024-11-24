@@ -1,3 +1,4 @@
+using Core.Application;
 using Core.NewsSearchs;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -15,7 +16,9 @@ public sealed class ScrapNewsJob(ILogger<ScrapNewsJob> logger, RegisterNewsSearc
         logger.LogInformation("Pesquisa de notícias finalizada");
 
         await registerNewsSearch.Handle(search);
-
         logger.LogInformation("Pesquisa de notícias registrada");
+        
+        var globalInfo = GlobalInfo.GetInstance();
+        globalInfo.LastNewsSearch = search.CreatedAt;
     }
 }
