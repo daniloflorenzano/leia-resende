@@ -1,9 +1,9 @@
-using System.Linq.Expressions;
+using Core.Application;
 
 namespace Core.News;
 
 public interface INewsRepository
 {
     Task Write(List<News> news);
-    Task<List<News>> Read(Expression<Func<News, bool>>? where = null);
+    Task<List<News>> Read(SearchFilter? filter = null);
 }

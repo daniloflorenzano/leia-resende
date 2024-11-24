@@ -1,4 +1,4 @@
-using Core.Extensions;
+using Core.Application.Extensions;
 using HtmlAgilityPack;
 
 namespace Core.News.DataSources;

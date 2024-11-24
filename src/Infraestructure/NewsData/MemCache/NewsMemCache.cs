@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+﻿using Core.Application;
 using Core.News;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -17,7 +17,7 @@ public sealed class NewsMemCache : INewsRepository
         }
     );
 
-    public async Task Write(News news)
+    private async Task Write(News news)
     {
         await _cache.GetOrCreateAsync(
             news.Id, cacheEntry =>
@@ -50,17 +50,24 @@ public sealed class NewsMemCache : INewsRepository
         return Math.Max(1, size); // Garantir que o tamanho seja pelo menos 1
     }
 
-    public Task<List<News>> Read(Expression<Func<News, bool>>? where = null)
+    public Task<List<News>> Read(SearchFilter? filter = null)
     {
         var cacheEntries = _cache.GetKeys<News>().ToList();
         
-        if (where == null)
-        {
+        if (filter is null)
             return Task.FromResult(cacheEntries);
-        }
         
-        var filteredEntries = cacheEntries.Where(where.Compile()).ToList();
+        if (filter.Where is not null) 
+            cacheEntries = cacheEntries.Where(filter.Where.Compile()).ToList();
+        
+        if (filter.OrderBy is not null)
+            cacheEntries = filter.OrderByDescending
+                ? cacheEntries.OrderByDescending(filter.OrderBy.Compile()).ToList()
+                : cacheEntries.OrderBy(filter.OrderBy.Compile()).ToList();
+        
+        if (filter is { PaginationStart: > 0, PaginationEnd: > 0 }) 
+            cacheEntries = cacheEntries.Skip(filter.PaginationStart).Take(filter.PaginationEnd).ToList();
 
-        return Task.FromResult(filteredEntries);
+        return Task.FromResult(cacheEntries);
     }
 }

@@ -1,7 +1,9 @@
-﻿@page "/"
+﻿@page "/{pagination:int?}"
 @inject IJSRuntime JSRuntime
 @using Core.News
 @using System.Linq;
+@using Core.Application
+@using Core.Application.Extensions
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject GetNews getNews;
 
@@ -258,6 +260,7 @@
 </script>
 
 @code {
+    [Parameter] public int pagination { get; set; }
     private IEnumerable<News>? news;
     private Dictionary<SubjectEnum, string>? SubjectDict;
     private SubjectEnum? selectedSubject = null;
@@ -266,7 +269,11 @@
     {
         if (news is null)
         {
-            var result = await getNews.Handle();
+            var filter = new SearchFilter()
+                .WithPagination(pagination, 20)
+                .WithOrderByDesc(n => n.PublishedAt);
+            
+            var result = await getNews.Handle(filter);
             news = result;
             LoadSubjectDict();
         }
