@@ -1,9 +1,9 @@
 @using Core.News
 
-<div class="filter-container mb-4">
+<div class="filter-container mb-4 px-3">
     <div class="row g-3">
-        <!-- Barra de Pesquisa -->
-        <div>
+        <!-- Search Bar -->
+        <div class="col-12">
             <div class="search-container">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0">
@@ -26,38 +26,41 @@
             </div>
         </div>
 
-        <!-- Dropdown de Categorias para Mobile -->
-        <div class="col-md-6 d-block d-md-none">
-            <Dropdown>
-                @* ReSharper disable once Razor.UnresolvedComponent *@
-                <DropdownToggle Color="ButtonColor.Light" Class="w-100">
-                    <i class="bi bi-filter me-2"></i>
-                    @(SelectedSubject == null ? "Todas as Categorias" : SubjectDict![SelectedSubject.Value])
-                </DropdownToggle>
-                <DropdownMenu>
-                    <DropdownItem @onclick="SetSubjectAsNull" Active="SelectedSubject == null">
+        <!-- Mobile Category Dropdown -->
+        <div class="col-12 d-md-none">
+            <div class="dropdown w-100">
+                <button class="btn btn-light dropdown-toggle w-100 d-flex justify-content-between align-items-center"
+                        type="button"
+                        @onclick="ToggleDropdown">
+                    <span>
+                        <i class="bi bi-filter me-2"></i>
+                        @(SelectedSubject == null ? "Todas as Categorias" : SubjectDict![SelectedSubject.Value])
+                    </span>
+                </button>
+                <div class="dropdown-menu w-100 @(_isDropdownOpen ? "show" : "")" @onclick:stopPropagation="true">
+                    <button class="dropdown-item @(SelectedSubject == null ? "active" : "")"
+                            @onclick="SetSubjectAsNull">
                         Todas as Categorias
-                    </DropdownItem>
-                    <DropdownDivider/>
+                    </button>
+                    <div class="dropdown-divider"></div>
                     @if (SubjectDict != null)
                     {
                         @foreach (var subject in SubjectDict)
                         {
-                            <DropdownItem
-                                @onclick="@(() => SetSubject(subject.Key))"
-                                Active="SelectedSubject == subject.Key">
+                            <button class="dropdown-item @(SelectedSubject == subject.Key ? "active" : "")"
+                                    @onclick="@(() => SetSubject(subject.Key))">
                                 @subject.Value
-                            </DropdownItem>
+                            </button>
                         }
                     }
-                </DropdownMenu>
-            </Dropdown>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Pills de Categorias para Desktop -->
+    <!-- Desktop Category Pills -->
     <div class="category-pills mt-3 d-none d-md-block">
-        <div class="d-flex flex-wrap gap-2" style="justify-content: center">
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
             <button
                 class="btn btn-pill @(SelectedSubject == null ? "btn-primary" : "btn-outline-primary")"
                 @onclick="SetSubjectAsNull">
@@ -77,7 +80,7 @@
         </div>
     </div>
 
-    <!-- Exibição de Filtros Ativos -->
+    <!-- Active Filters -->
     @if (!string.IsNullOrEmpty(_searchText) || SelectedSubject != null)
     {
         <div class="active-filters mt-3">
@@ -85,17 +88,17 @@
                 <small class="text-muted me-2">Filtros ativos:</small>
                 @if (!string.IsNullOrEmpty(_searchText))
                 {
-                    <Badge Color="BadgeColor.Light" Class="d-flex align-items-center">
+                    <span class="badge bg-light text-dark d-flex align-items-center">
                         <span class="me-2">@_searchText</span>
-                        <button class="btn-close btn-close-sm" @onclick="ClearSearch"></button>
-                    </Badge>
+                        <button type="button" class="btn-close btn-close-sm" @onclick="ClearSearch"></button>
+                    </span>
                 }
                 @if (SelectedSubject != null && SubjectDict != null)
                 {
-                    <Badge Color="BadgeColor.Light" Class="d-flex align-items-center">
+                    <span class="badge bg-light text-dark d-flex align-items-center">
                         <span class="me-2">@SubjectDict[SelectedSubject.Value]</span>
-                        <button class="btn-close btn-close-sm" @onclick="SetSubjectAsNull"></button>
-                    </Badge>
+                        <button type="button" class="btn-close btn-close-sm" @onclick="SetSubjectAsNull"></button>
+                    </span>
                 }
                 <button class="btn btn-link btn-sm p-0" @onclick="ClearAllFilters">Limpar todos</button>
             </div>
@@ -106,32 +109,39 @@
 @code {
     private string _searchText = string.Empty;
     private Timer? _searchTimer;
+    private bool _isDropdownOpen;
 
     [Parameter] public SubjectEnum? SelectedSubject { get; set; }
-
     [Parameter] public Dictionary<SubjectEnum, string>? SubjectDict { get; set; }
-
     [Parameter] public EventCallback<SubjectEnum?> SelectedSubjectChanged { get; set; }
-
     [Parameter] public EventCallback<string> OnSearch { get; set; }
 
-    private void SetSubject(SubjectEnum subject)
+    private void ToggleDropdown()
     {
-        SelectedSubject = subject;
-        SelectedSubjectChanged.InvokeAsync(subject);
+        _isDropdownOpen = !_isDropdownOpen;
     }
 
-    private void SetSubjectAsNull()
+    private async Task SetSubject(SubjectEnum subject)
+    {
+        SelectedSubject = subject;
+        _isDropdownOpen = false;
+        await SelectedSubjectChanged.InvokeAsync(subject);
+    }
+
+    private async Task SetSubjectAsNull()
     {
         SelectedSubject = null;
-        SelectedSubjectChanged.InvokeAsync(null);
+        _isDropdownOpen = false;
+        await SelectedSubjectChanged.InvokeAsync(null);
     }
 
     private void HandleSearch()
     {
-        // Implementa debounce na pesquisa
         _searchTimer?.Dispose();
-        _searchTimer = new Timer(async _ => { await InvokeAsync(async () => { await OnSearch.InvokeAsync(_searchText); }); }, null, 300, Timeout.Infinite);
+        _searchTimer = new Timer(async _ =>
+        {
+        await InvokeAsync(async () => await OnSearch.InvokeAsync(_searchText));
+        }, null, 300, Timeout.Infinite);
     }
 
     private async Task ClearSearch()
@@ -151,7 +161,6 @@
     {
         _searchTimer?.Dispose();
     }
-
 }
 
 <style>
@@ -163,16 +172,21 @@
     }
 
     .search-container .input-group {
-        border-radius: 50px;
+        overflow: hidden;
     }
 
     .search-container .form-control:focus {
         box-shadow: none;
+        border-color: #dee2e6;
     }
 
     .search-container .input-group-text,
     .search-container .btn {
         background-color: transparent;
+    }
+
+    .search-container .btn:hover {
+        background-color: #f8f9fa;
     }
 
     .active-filters .badge {
@@ -182,5 +196,29 @@
 
     .btn-close-sm {
         font-size: 0.6rem;
+        padding: 0.25rem;
+    }
+
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Mobile optimizations */
+    @@media (max-width: 767.98px) {
+    .dropdown-menu.show {
+        position: absolute;
+        width: 100%;
+        margin-top: 0.5rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .active-filters {
+        margin-top: 1rem;
+    }
+
+    .active-filters .badge {
+        font-size: 0.875rem;
+    }
     }
 </style>
