@@ -20,7 +20,7 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
                 BatchSize = 5000,
                 PreserveInsertOrder = false,
                 SqlBulkCopyOptions = SqlBulkCopyOptions.Default,
-                UpdateByProperties = [ nameof(News.Title), nameof(News.PublishedAt)],
+                UpdateByProperties = [ nameof(News.OriginalUrl) ],
                 PropertiesToIncludeOnUpdate = [""]
             };
 
