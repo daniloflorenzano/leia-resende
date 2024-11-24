@@ -23,8 +23,8 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
 
         logger.LogInformation("Buscando notícias no banco de dados");
         var news = await GetNewsFromDb(filter);
-        foreach (var newsItem in news) 
-            await memCacheRepository.Write(news);
+        
+        await memCacheRepository.Write(news, filter);
         
         return news;
     }
