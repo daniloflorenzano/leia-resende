@@ -10,7 +10,7 @@
 <PageTitle>Página inicial - Todas as Notícias</PageTitle>
 
 <div class="container">
-    <Modal @ref="_modal" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.Large"  class="news-modal">
+    <Modal @ref="_modal" IsVerticallyCentered="true" IsScrollable="true" Size="ModalSize.Large" class="news-modal">
         <HeaderTemplate>
             <div class="modal-header border-0 pb-0">
                 <NewsSujectBadge news="@_newsItem"/>
@@ -29,7 +29,8 @@
                 <div class="d-flex align-items-center mb-4">
                     @if (_newsItem.AuthorIconUrl is not null)
                     {
-                        <img src="@_newsItem.AuthorIconUrl" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="@_newsItem.Author"/>
+                        <img src="@_newsItem.AuthorIconUrl" class="rounded-circle me-2"
+                             style="width: 40px; height: 40px;" alt="@_newsItem.Author"/>
                     }
                     <div>
                         <div class="fw-bold">@_newsItem.Author</div>
@@ -67,26 +68,27 @@
         <h1 class="site-title">
             <img src="logo.svg" alt="logo Leia Resende"/>
 
-            <i class="bi bi-brightness-high-fill theme-toggle" id="themeIcon" onclick="toggleTheme()" style="cursor: pointer;"></i>
+            <i class="bi bi-brightness-high-fill theme-toggle" id="themeIcon" onclick="toggleTheme()"
+               style="cursor: pointer;"></i>
         </h1>
         <p class="site-subtitle">Agregador de notícias</p>
     </div>
 
 
-    @if (news != null)
+    @if (_news != null)
     {
         <div class="topics-header d-flex justify-content-center flex-wrap mb-4">
             <div class="col-12 col-md-8 col-lg-6">
                 <NewsFilter
-                    SelectedSubject="@selectedSubject"
+                    SelectedSubject="@_selectedSubject"
                     SelectedSubjectChanged="@(subject => HandleSubjectChange(subject))"
-                    SubjectDict="@SubjectDict"
+                    SubjectDict="@_subjectDict"
                     OnSearch="@HandleSearch"/>
             </div>
         </div>
 
         <div class="d-flex flex-wrap justify-content-start gap-4">
-            @foreach (var item in news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
+            @foreach (var item in _news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
             {
                 <div class="col-md-3" style="max-width: 21rem; min-width: 16rem;">
                     <div class="news-card" @onclick="() => OnShowModalClick(item)">
@@ -95,11 +97,11 @@
                 </div>
             }
         </div>
-        
-        
-        var totalItems = GlobalInfo.GetInstance().TotalNews;
+
+
+        var totalItems = GlobalInfo.TotalNews;
         var totalPages = (int)Math.Ceiling((double)totalItems / PageSize);
-        
+
         <div class="mt-4">
             <Pagination ActivePageNumber="@_activePageNumber"
                         TotalPages="@totalPages"
@@ -154,7 +156,7 @@
         font-size: 1.2rem;
         color: #666;
     }
-    
+
     .topics-header {
         margin-bottom: 2rem;
     }
@@ -185,7 +187,7 @@
         transition: transform 0.3s, box-shadow 0.3s;
         height: 100%;
     }
-    
+
     .news-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -196,7 +198,7 @@
         background-color: #1c1f26;
         color: #f0f0f0;
     }
-    
+
     .theme-toggle {
         font-size: 1.5rem;
         margin-left: 0.5rem;
@@ -215,7 +217,7 @@
         background-color: #222;
         color: #aaa;
     }
-    
+
     .dark-theme .modal-content {
         background-color: #1c1f26;
         color: #f0f0f0;
@@ -252,7 +254,7 @@
 
 
     function copyLink(link) {
-        navigator.clipboard.writeText(link).then(function() {
+        navigator.clipboard.writeText(link).then(function () {
             Toastify({
                 text: "Link copiado com sucesso!",
                 duration: 3000,
@@ -262,7 +264,7 @@
                 backgroundColor: "#4CAF50",
                 stopOnFocus: true,
             }).showToast();
-        }, function(err) {
+        }, function (err) {
             Toastify({
                 text: "Erro ao copiar o link!",
                 duration: 3000,
@@ -277,16 +279,19 @@
 </script>
 
 @code {
+    private GlobalInfo GlobalInfo => GlobalInfo.GetInstance();
     private const int PageSize = 20;
-    
+
+    private string _searchText = string.Empty;
+
     private int _activePageNumber = 1;
-    private IEnumerable<News>? news;
-    private Dictionary<SubjectEnum, string>? SubjectDict;
-    private SubjectEnum? selectedSubject = null;
+    private IEnumerable<News>? _news;
+    private Dictionary<SubjectEnum, string>? _subjectDict;
+    private SubjectEnum? _selectedSubject = null;
 
     protected override async Task OnInitializedAsync()
     {
-        if (news is null)
+        if (_news is null)
         {
             await LoadNews(_activePageNumber);
             LoadSubjectDict();
@@ -305,54 +310,41 @@
     private async Task LoadNews(int newPageNumber)
     {
         _activePageNumber = newPageNumber;
-        
+
         var paginationStart = (_activePageNumber - 1) * PageSize;
-        
+
         var filter = new SearchFilter()
             .WithPagination(paginationStart, PageSize)
             .WithOrderByDesc(n => n.PublishedAt);
 
+        if (_selectedSubject is not null && string.IsNullOrEmpty(_searchText))
+            filter.WithWhere(n => n.Subject == _selectedSubject);
+
+        if (!string.IsNullOrEmpty(_searchText) && _selectedSubject is null)
+            filter.WithWhere(n => n.Title.Contains(_searchText));
+
+        if (!string.IsNullOrEmpty(_searchText) && _selectedSubject is not null)
+            filter.WithWhere(n => n.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase) && n.Subject == _selectedSubject);
+
         var result = await getNews.Handle(filter);
-        news = result;
+        _news = result;
     }
 
-
-    private void LoadSubjectDict()
-    {
-        if (news != null)
-        {
-            SubjectDict = news
-                .GroupBy(n => n.Subject)
-                .ToDictionary(g => g.Key, g => g.First().GetSubjectInPtBr());
-        }
-    }
+    private void LoadSubjectDict() =>
+        _subjectDict = GlobalInfo.AvailableSubjects
+            .ToDictionary(s => s, s => s.ToPortugueseString());
 
     private async Task HandleSubjectChange(SubjectEnum? subject)
     {
-        selectedSubject = subject;
-        await FilterNews();
+        _selectedSubject = subject;
+        await LoadNews(_activePageNumber);
     }
 
     private async Task HandleSearch(string searchText)
     {
-        await FilterNews(searchText);
+        _searchText = searchText;
+        await LoadNews(_activePageNumber);
     }
-
-    private async Task FilterNews(string? searchText = null)
-    {
-        if (selectedSubject is not null)
-            news = news!.Where(n => n.Subject == selectedSubject);
-
-        if (!string.IsNullOrEmpty(searchText))
-            news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-
-        if (selectedSubject is null && string.IsNullOrEmpty(searchText))
-        {
-            var result = await getNews.Handle();
-            news = result;
-        }
-    }
-
 
     private Modal _modal = default!;
     private News? _newsItem;

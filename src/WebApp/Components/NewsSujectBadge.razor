@@ -1,5 +1,6 @@
+@using Core.Application.Extensions
 @using Core.News
-<p class="@news.Subject subject-default">@news.GetSubjectInPtBr()</p>
+<p class="@news.Subject subject-default">@news.Subject.ToPortugueseString()</p>
 
 <style>
     .subject-default {

@@ -1,3 +1,5 @@
+using Core.News;
+
 namespace Core.Application;
 
 public class GlobalInfo
@@ -16,4 +18,5 @@ public class GlobalInfo
 
     public int TotalNews { get; set; }
     public DateTime LastNewsSearch { get; set; }
+    public List<SubjectEnum> AvailableSubjects { get; set; } = [];
 }

@@ -5,7 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infraestructure.NewsData;
 
-public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, NewsMemCache memCacheRepository, NewsAzureSqlDatabase dbRepository) : INewsRepository
+public sealed class NewsRepositoryProxy(
+    ILogger<NewsRepositoryProxy> logger,
+    NewsMemCache memCacheRepository,
+    NewsAzureSqlDatabase dbRepository) : INewsRepository
 {
     public async Task Write(List<News> news)
     {
@@ -23,21 +26,17 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
 
         logger.LogInformation("Buscando notícias no banco de dados");
         var news = await GetNewsFromDb(filter);
-        
+
         await memCacheRepository.Write(news, filter);
-        
+
         return news;
     }
 
     public async Task<int> Count() => await dbRepository.Count();
+    public async Task<List<SubjectEnum>> GetAvailableSubjects() => await dbRepository.GetAvailableSubjects();
 
-    private async Task<IEnumerable<News>> GetNewsFromCache(SearchFilter? filter = null)
-    {
-        return await memCacheRepository.Read(filter);
-    }
+    private async Task<IEnumerable<News>> GetNewsFromCache(SearchFilter? filter = null) =>
+        await memCacheRepository.Read(filter);
 
-    private async Task<List<News>> GetNewsFromDb(SearchFilter? filter = null)
-    {
-        return await dbRepository.Read(filter);
-    }
+    private async Task<List<News>> GetNewsFromDb(SearchFilter? filter = null) => await dbRepository.Read(filter);
 }

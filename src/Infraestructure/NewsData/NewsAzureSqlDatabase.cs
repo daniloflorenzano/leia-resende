@@ -43,9 +43,12 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
 
             if (filter is null) 
                 return await query.ToListAsync();
-            
-            if (filter.Where is not null) 
-                query = query.Where(filter.Where);
+
+            if (filter.Where is not null)
+            {
+                var transformedWhere = EfExpressionTransformer.Transform(filter.Where);
+                query = query.Where(transformedWhere);
+            }
             
             if (filter.OrderBy is not null)
                 query = filter.OrderByDescending 
@@ -75,5 +78,18 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
             logger.LogError(e, "Erro ao contar notícias: {message}", e.Message);
             throw;
         }        
+    }
+
+    public async Task<List<SubjectEnum>> GetAvailableSubjects()
+    {
+        try
+        {
+            return await dbContext.News.Select(n => n.Subject).Distinct().ToListAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Erro ao buscar assuntos: {message}", e.Message);
+            throw;
+        }
     }
 }

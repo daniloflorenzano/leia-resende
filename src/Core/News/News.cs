@@ -51,23 +51,6 @@ public sealed class News
         return json;
     }
 
-    public string GetSubjectInPtBr()
-    {
-        return Subject switch
-        {
-            SubjectEnum.Politics => "Política",
-            SubjectEnum.Health => "Saúde",
-            SubjectEnum.Sports => "Esportes",
-            SubjectEnum.Economy => "Economia",
-            SubjectEnum.Woman => "Mulher",
-            SubjectEnum.Culture => "Cultura",
-            SubjectEnum.Environment => "Meio Ambiente",
-            SubjectEnum.Tourism => "Turismo",
-            SubjectEnum.Education => "Educação",
-            _ => "Indefinido"
-        };
-    }
-
     public string GetFormatedTitle() {
         return Title.Length > 100 ? Title.Substring(0, 97).Trim() + "..." : Title;
     }

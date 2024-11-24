@@ -18,6 +18,7 @@ public sealed class RegisterNews(ILogger<RegisterNews> logger, INewsRepository n
     {
         var globalInfo = GlobalInfo.GetInstance();
         globalInfo.TotalNews = newsRepository.Count().Result;
+        globalInfo.AvailableSubjects = newsRepository.GetAvailableSubjects().Result;
     }
 
     public void OnError(Exception error)
