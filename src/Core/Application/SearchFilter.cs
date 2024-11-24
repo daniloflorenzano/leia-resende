@@ -5,7 +5,7 @@ namespace Core.Application;
 public sealed class SearchFilter
 {
     public int PaginationStart { get; set; }
-    public int PaginationEnd { get; set; }
+    public int PaginationTake { get; set; }
     public Expression<Func<News.News, bool>>? Where { get; set; }
     public Expression<Func<News.News, object>>? OrderBy { get; set; }
     public bool OrderByDescending { get; set; }
@@ -20,7 +20,7 @@ public sealed class SearchFilter
             
             // Combina hash com cada propriedade
             hash = hash * 23 + PaginationStart.GetHashCode();
-            hash = hash * 23 + PaginationEnd.GetHashCode();
+            hash = hash * 23 + PaginationTake.GetHashCode();
             hash = hash * 23 + OrderByDescending.GetHashCode();
             
             // Para Expression, precisamos considerar a expressão em string
@@ -40,7 +40,7 @@ public sealed class SearchFilter
         if (obj is not SearchFilter other) return false;
         
         return PaginationStart == other.PaginationStart &&
-               PaginationEnd == other.PaginationEnd &&
+               PaginationTake == other.PaginationTake &&
                OrderByDescending == other.OrderByDescending &&
                Where?.ToString() == other.Where?.ToString() &&
                OrderBy?.ToString() == other.OrderBy?.ToString();

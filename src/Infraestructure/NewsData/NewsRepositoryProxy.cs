@@ -29,6 +29,8 @@ public sealed class NewsRepositoryProxy(ILogger<NewsRepositoryProxy> logger, New
         return news;
     }
 
+    public async Task<int> Count() => await dbRepository.Count();
+
     private async Task<IEnumerable<News>> GetNewsFromCache(SearchFilter? filter = null)
     {
         return await memCacheRepository.Read(filter);

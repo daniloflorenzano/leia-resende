@@ -52,8 +52,8 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
                     ? query.OrderByDescending(filter.OrderBy) 
                     : query.OrderBy(filter.OrderBy);
 
-            if (filter is { PaginationStart: >= 0, PaginationEnd: > 0 }) 
-                query = query.Skip(filter.PaginationStart).Take(filter.PaginationEnd);
+            if (filter is { PaginationStart: >= 0, PaginationTake: > 0 }) 
+                query = query.Skip(filter.PaginationStart).Take(filter.PaginationTake);
 
             return await query.ToListAsync();
         }
@@ -62,5 +62,18 @@ public class NewsAzureSqlDatabase(AppDbContext dbContext, ILogger<NewsAzureSqlDa
             logger.LogError(e, "Erro ao ler notícias: {message}", e.Message);
             throw;
         }
+    }
+
+    public async Task<int> Count()
+    {
+        try
+        {
+            return await dbContext.News.CountAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Erro ao contar notícias: {message}", e.Message);
+            throw;
+        }        
     }
 }

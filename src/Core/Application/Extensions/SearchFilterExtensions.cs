@@ -23,14 +23,14 @@ public static class SearchFilterExtensions
         return filter;
     }
     
-    public static SearchFilter WithPagination(this SearchFilter filter, int start, int end)
+    public static SearchFilter WithPagination(this SearchFilter filter, int start, int take)
     {
-        if (start < 0 || end < 0 || start > end)
+        if (start < 0 || take < 0)
         {
             throw new ArgumentException("Invalid pagination range");
         }
         filter.PaginationStart = start;
-        filter.PaginationEnd = end;
+        filter.PaginationTake = take;
         return filter;
     }
 }

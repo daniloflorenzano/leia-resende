@@ -1,4 +1,4 @@
-﻿@page "/{pagination:int?}"
+﻿@page "/"
 @inject IJSRuntime JSRuntime
 @using Core.News
 @using System.Linq;
@@ -87,12 +87,28 @@
         <div class="d-flex flex-wrap justify-content-start gap-4">
             @foreach (var item in news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
             {
-                <div class="col-md-3" style="max-width: 21rem; min-width: 16rem">
+                <div class="col-md-3" style="max-width: 21rem; min-width: 16rem;">
                     <div class="news-card" @onclick="() => OnShowModalClick(item)">
                         <NewsCard news="@item"/>
                     </div>
                 </div>
             }
+        </div>
+        
+        
+        var totalItems = GlobalInfo.GetInstance().TotalNews;
+        var totalPages = (int)Math.Ceiling((double)totalItems / PageSize);
+        
+        <div class="mt-4">
+            <Pagination ActivePageNumber="@_activePageNumber"
+                        TotalPages="@totalPages"
+                        DisplayPages="5"
+                        Alignment="Alignment.Center"
+                        FirstLinkIcon="IconName.ChevronDoubleLeft"
+                        PreviousLinkIcon="IconName.ChevronLeft"
+                        NextLinkIcon="IconName.ChevronRight"
+                        LastLinkIcon="IconName.ChevronDoubleRight"
+                        PageChanged="@LoadNews"/>
         </div>
     }
     else
@@ -260,7 +276,9 @@
 </script>
 
 @code {
-    [Parameter] public int pagination { get; set; }
+    private const int PageSize = 20;
+    
+    private int _activePageNumber = 1;
     private IEnumerable<News>? news;
     private Dictionary<SubjectEnum, string>? SubjectDict;
     private SubjectEnum? selectedSubject = null;
@@ -269,15 +287,10 @@
     {
         if (news is null)
         {
-            var filter = new SearchFilter()
-                .WithPagination(pagination, 20)
-                .WithOrderByDesc(n => n.PublishedAt);
-            
-            var result = await getNews.Handle(filter);
-            news = result;
+            await LoadNews(_activePageNumber);
             LoadSubjectDict();
         }
-        
+
         try
         {
             await JSRuntime.InvokeVoidAsync("applySavedTheme");
@@ -286,6 +299,20 @@
         {
             Console.WriteLine($"Erro ao aplicar tema salvo: {ex.Message}");
         }
+    }
+
+    private async Task LoadNews(int newPageNumber)
+    {
+        _activePageNumber = newPageNumber;
+        
+        var paginationStart = (_activePageNumber - 1) * PageSize;
+        
+        var filter = new SearchFilter()
+            .WithPagination(paginationStart, PageSize)
+            .WithOrderByDesc(n => n.PublishedAt);
+
+        var result = await getNews.Handle(filter);
+        news = result;
     }
 
 
@@ -314,10 +341,10 @@
     {
         if (selectedSubject is not null)
             news = news!.Where(n => n.Subject == selectedSubject);
-        
+
         if (!string.IsNullOrEmpty(searchText))
             news = news!.Where(n => n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        
+
         if (selectedSubject is null && string.IsNullOrEmpty(searchText))
         {
             var result = await getNews.Handle();
@@ -356,6 +383,5 @@
             }
         }
     }
-
 
 }
