@@ -15,7 +15,7 @@ public class PrefeituraResende(HttpClient httpClient) : IDataSource
     {
         try
         {
-            var dateFilter = DateTime.Now.ToString("dd/MM/yyyy");
+            var dateFilter = DateTime.Now.AddDays(-1).ToString("dd/MM/yyyy");
             var dateFilterEncoded = HttpUtility.UrlEncode(dateFilter);
 
             var response =
