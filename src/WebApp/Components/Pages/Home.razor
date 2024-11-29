@@ -88,7 +88,7 @@
         </div>
 
         <div class="d-flex flex-wrap justify-content-start gap-4">
-            @foreach (var item in _news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.Title))
+            @foreach (var item in _news.OrderByDescending(n => n.PublishedAt).DistinctBy(n => n.OriginalUrl))
             {
                 <div class="col-md-3" style="max-width: 21rem; min-width: 16rem;">
                     <div class="news-card" @onclick="() => OnShowModalClick(item)">
