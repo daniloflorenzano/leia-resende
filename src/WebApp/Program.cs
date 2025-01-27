@@ -5,10 +5,23 @@ using Infraestructure.EfCore;
 using Infraestructure.NewsData;
 using Infraestructure.NewsData.MemCache;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 using WebApp.Components;
 using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logUrl = builder.Configuration["Seq:Url"] ?? string.Empty;
+var logApiKey = builder.Configuration["Seq:ApiKey"] ?? string.Empty;
+
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(x => x.AddOtlpExporter(a =>
+{
+    a.Endpoint = new Uri(logUrl);
+    a.Protocol = OtlpExportProtocol.HttpProtobuf;
+    a.Headers = "X-Seq-ApiKey=" + logApiKey;
+}));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -17,7 +30,6 @@ builder.Services.AddRazorComponents()
 var connectionString = builder.Configuration.GetConnectionString("database");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 builder.Services.AddScoped<NewsAzureSqlDatabase>();
 builder.Services.AddSingleton<NewsMemCache>();
 builder.Services.AddScoped<INewsRepository, NewsRepositoryProxy>();
